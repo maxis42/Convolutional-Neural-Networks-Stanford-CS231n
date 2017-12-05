@@ -5,9 +5,9 @@ ___
 ***Please make homeworks by your own and look in this repository only when you've already done the assignments. Anyway, it is in your interests if you really want to learn something.***
 ___
 
-### Lectures(https://github.com/maxis42/CS231n/tree/master/Lectures)
+### [Lectures](https://github.com/maxis42/CS231n/tree/master/Lectures)
 
-### Assignment #1: Image Classification, kNN, SVM, Softmax, Neural Network(https://github.com/maxis42/CS231n/tree/master/assignment1)
+### [Assignment #1: Image Classification, kNN, SVM, Softmax, Neural Network](https://github.com/maxis42/CS231n/tree/master/assignment1)
 * [Q1: k-Nearest Neighbor classifier](https://github.com/maxis42/CS231n/blob/master/assignment1/knn.ipynb)
 * [Q2: Training a Support Vector Machine](https://github.com/maxis42/CS231n/blob/master/assignment1/svm.ipynb)
 * [Q3: Implement a Softmax classifier](https://github.com/maxis42/CS231n/blob/master/assignment1/softmax.ipynb)
