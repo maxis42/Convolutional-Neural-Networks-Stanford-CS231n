@@ -14,7 +14,7 @@ ___
 * [Q4: Two-Layer Neural Network](https://github.com/maxis42/CS231n/blob/master/assignment1/two_layer_net.ipynb)
 * [Q5: Higher Level Representations: Image Features](https://github.com/maxis42/CS231n/blob/master/assignment1/features.ipynb)
 
-### Assignment #2: Fully-Connected Nets, Batch Normalization, Dropout, Convolutional Nets
+### [Assignment #2: Fully-Connected Nets, Batch Normalization, Dropout, Convolutional Nets](https://github.com/maxis42/CS231n/tree/master/assignment2)
 * [Q1: Fully-connected Neural Network](https://github.com/maxis42/CS231n/blob/master/assignment2/FullyConnectedNets.ipynb)
 * [Q2: Batch Normalization](https://github.com/maxis42/CS231n/blob/master/assignment2/BatchNormalization.ipynb)
 * [Q3: Dropout](https://github.com/maxis42/CS231n/blob/master/assignment2/Dropout.ipynb)
