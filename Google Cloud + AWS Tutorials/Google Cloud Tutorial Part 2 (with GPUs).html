@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<!-- saved from url=(0042)http://cs231n.github.io/gce-tutorial-gpus/ -->
+<html class="gr__cs231n_github_io"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Google Cloud Tutorial Part 2 (with GPUs)</title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="Course materials and notes for Stanford class CS231n: Convolutional Neural Networks for Visual Recognition.">
+    <link rel="canonical" href="http://cs231n.github.io/gce-tutorial-gpus/">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="./Google Cloud Tutorial Part 2 (with GPUs)_files/main.css">
+
+    <!-- Google fonts -->
+    <link href="./Google Cloud Tutorial Part 2 (with GPUs)_files/css" rel="stylesheet" type="text/css">
+
+    <!-- Google tracking -->
+    <script async="" src="http://www.google-analytics.com/analytics.js"></script><script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-46895817-2', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+    
+<style type="text/css">.MathJax_Hover_Frame {border-radius: .25em; -webkit-border-radius: .25em; -moz-border-radius: .25em; -khtml-border-radius: .25em; box-shadow: 0px 0px 15px #83A; -webkit-box-shadow: 0px 0px 15px #83A; -moz-box-shadow: 0px 0px 15px #83A; -khtml-box-shadow: 0px 0px 15px #83A; border: 1px solid #A6D ! important; display: inline-block; position: absolute}
+.MathJax_Menu_Button .MathJax_Hover_Arrow {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 4px; -webkit-border-radius: 4px; -moz-border-radius: 4px; -khtml-border-radius: 4px; font-family: 'Courier New',Courier; font-size: 9px; color: #F0F0F0}
+.MathJax_Menu_Button .MathJax_Hover_Arrow span {display: block; background-color: #AAA; border: 1px solid; border-radius: 3px; line-height: 0; padding: 4px}
+.MathJax_Hover_Arrow:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_Hover_Arrow:hover span {background-color: #CCC!important}
+</style><style type="text/css">#MathJax_About {position: fixed; left: 50%; width: auto; text-align: center; border: 3px outset; padding: 1em 2em; background-color: #DDDDDD; color: black; cursor: default; font-family: message-box; font-size: 120%; font-style: normal; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; border-radius: 15px; -webkit-border-radius: 15px; -moz-border-radius: 15px; -khtml-border-radius: 15px; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_About.MathJax_MousePost {outline: none}
+.MathJax_Menu {position: absolute; background-color: white; color: black; width: auto; padding: 5px 0px; border: 1px solid #CCCCCC; margin: 0; cursor: default; font: menu; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; border-radius: 5px; -webkit-border-radius: 5px; -moz-border-radius: 5px; -khtml-border-radius: 5px; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+.MathJax_MenuItem {padding: 1px 2em; background: transparent}
+.MathJax_MenuArrow {position: absolute; right: .5em; padding-top: .25em; color: #666666; font-size: .75em}
+.MathJax_MenuActive .MathJax_MenuArrow {color: white}
+.MathJax_MenuArrow.RTL {left: .5em; right: auto}
+.MathJax_MenuCheck {position: absolute; left: .7em}
+.MathJax_MenuCheck.RTL {right: .7em; left: auto}
+.MathJax_MenuRadioCheck {position: absolute; left: .7em}
+.MathJax_MenuRadioCheck.RTL {right: .7em; left: auto}
+.MathJax_MenuLabel {padding: 1px 2em 3px 1.33em; font-style: italic}
+.MathJax_MenuRule {border-top: 1px solid #DDDDDD; margin: 4px 3px}
+.MathJax_MenuDisabled {color: GrayText}
+.MathJax_MenuActive {background-color: #606872; color: white}
+.MathJax_MenuDisabled:focus, .MathJax_MenuLabel:focus {background-color: #E8E8E8}
+.MathJax_ContextMenu:focus {outline: none}
+.MathJax_ContextMenu .MathJax_MenuItem:focus {outline: none}
+#MathJax_AboutClose {top: .2em; right: .2em}
+.MathJax_Menu .MathJax_MenuClose {top: -10px; left: -10px}
+.MathJax_MenuClose {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; font-family: 'Courier New',Courier; font-size: 24px; color: #F0F0F0}
+.MathJax_MenuClose span {display: block; background-color: #AAA; border: 1.5px solid; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; line-height: 0; padding: 8px 0 6px}
+.MathJax_MenuClose:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_MenuClose:hover span {background-color: #CCC!important}
+.MathJax_MenuClose:hover:focus {outline: none}
+</style><style type="text/css">.MathJax_Preview .MJXf-math {color: inherit!important}
+</style><style type="text/css">.MJX_Assistive_MathML {position: absolute!important; top: 0; left: 0; clip: rect(1px, 1px, 1px, 1px); padding: 1px 0 0 0!important; border: 0!important; height: 1px!important; width: 1px!important; overflow: hidden!important; display: block!important; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none}
+.MJX_Assistive_MathML.MJX_Assistive_MathML_Block {width: 100%!important}
+</style><style type="text/css">#MathJax_Zoom {position: absolute; background-color: #F0F0F0; overflow: auto; display: block; z-index: 301; padding: .5em; border: 1px solid black; margin: 0; font-weight: normal; font-style: normal; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; -webkit-box-sizing: content-box; -moz-box-sizing: content-box; box-sizing: content-box; box-shadow: 5px 5px 15px #AAAAAA; -webkit-box-shadow: 5px 5px 15px #AAAAAA; -moz-box-shadow: 5px 5px 15px #AAAAAA; -khtml-box-shadow: 5px 5px 15px #AAAAAA; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_ZoomOverlay {position: absolute; left: 0; top: 0; z-index: 300; display: inline-block; width: 100%; height: 100%; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+#MathJax_ZoomFrame {position: relative; display: inline-block; height: 0; width: 0}
+#MathJax_ZoomEventTrap {position: absolute; left: 0; top: 0; z-index: 302; display: inline-block; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+</style><style type="text/css">.MathJax_Preview {color: #888}
+#MathJax_Message {position: fixed; left: 1em; bottom: 1.5em; background-color: #E6E6E6; border: 1px solid #959595; margin: 0px; padding: 2px 8px; z-index: 102; color: black; font-size: 80%; width: auto; white-space: nowrap}
+#MathJax_MSIE_Frame {position: absolute; top: 0; left: 0; width: 0px; z-index: 101; border: 0px; margin: 0px; padding: 0px}
+.MathJax_Error {color: #CC0000; font-style: italic}
+</style><style type="text/css">.MJXp-script {font-size: .8em}
+.MJXp-right {-webkit-transform-origin: right; -moz-transform-origin: right; -ms-transform-origin: right; -o-transform-origin: right; transform-origin: right}
+.MJXp-bold {font-weight: bold}
+.MJXp-italic {font-style: italic}
+.MJXp-scr {font-family: MathJax_Script,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-frak {font-family: MathJax_Fraktur,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-sf {font-family: MathJax_SansSerif,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-cal {font-family: MathJax_Caligraphic,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-mono {font-family: MathJax_Typewriter,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-largeop {font-size: 150%}
+.MJXp-largeop.MJXp-int {vertical-align: -.2em}
+.MJXp-math {display: inline-block; line-height: 1.2; text-indent: 0; font-family: 'Times New Roman',Times,STIXGeneral,serif; white-space: nowrap; border-collapse: collapse}
+.MJXp-display {display: block; text-align: center; margin: 1em 0}
+.MJXp-math span {display: inline-block}
+.MJXp-box {display: block!important; text-align: center}
+.MJXp-box:after {content: " "}
+.MJXp-rule {display: block!important; margin-top: .1em}
+.MJXp-char {display: block!important}
+.MJXp-mo {margin: 0 .15em}
+.MJXp-mfrac {margin: 0 .125em; vertical-align: .25em}
+.MJXp-denom {display: inline-table!important; width: 100%}
+.MJXp-denom > * {display: table-row!important}
+.MJXp-surd {vertical-align: top}
+.MJXp-surd > * {display: block!important}
+.MJXp-script-box > *  {display: table!important; height: 50%}
+.MJXp-script-box > * > * {display: table-cell!important; vertical-align: top}
+.MJXp-script-box > *:last-child > * {vertical-align: bottom}
+.MJXp-script-box > * > * > * {display: block!important}
+.MJXp-mphantom {visibility: hidden}
+.MJXp-munderover {display: inline-table!important}
+.MJXp-over {display: inline-block!important; text-align: center}
+.MJXp-over > * {display: block!important}
+.MJXp-munderover > * {display: table-row!important}
+.MJXp-mtable {vertical-align: .25em; margin: 0 .125em}
+.MJXp-mtable > * {display: inline-table!important; vertical-align: middle}
+.MJXp-mtr {display: table-row!important}
+.MJXp-mtd {display: table-cell!important; text-align: center; padding: .5em 0 0 .5em}
+.MJXp-mtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-mlabeledtr {display: table-row!important}
+.MJXp-mlabeledtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mlabeledtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-merror {background-color: #FFFF88; color: #CC0000; border: 1px solid #CC0000; padding: 1px 3px; font-style: normal; font-size: 90%}
+.MJXp-scale0 {-webkit-transform: scaleX(.0); -moz-transform: scaleX(.0); -ms-transform: scaleX(.0); -o-transform: scaleX(.0); transform: scaleX(.0)}
+.MJXp-scale1 {-webkit-transform: scaleX(.1); -moz-transform: scaleX(.1); -ms-transform: scaleX(.1); -o-transform: scaleX(.1); transform: scaleX(.1)}
+.MJXp-scale2 {-webkit-transform: scaleX(.2); -moz-transform: scaleX(.2); -ms-transform: scaleX(.2); -o-transform: scaleX(.2); transform: scaleX(.2)}
+.MJXp-scale3 {-webkit-transform: scaleX(.3); -moz-transform: scaleX(.3); -ms-transform: scaleX(.3); -o-transform: scaleX(.3); transform: scaleX(.3)}
+.MJXp-scale4 {-webkit-transform: scaleX(.4); -moz-transform: scaleX(.4); -ms-transform: scaleX(.4); -o-transform: scaleX(.4); transform: scaleX(.4)}
+.MJXp-scale5 {-webkit-transform: scaleX(.5); -moz-transform: scaleX(.5); -ms-transform: scaleX(.5); -o-transform: scaleX(.5); transform: scaleX(.5)}
+.MJXp-scale6 {-webkit-transform: scaleX(.6); -moz-transform: scaleX(.6); -ms-transform: scaleX(.6); -o-transform: scaleX(.6); transform: scaleX(.6)}
+.MJXp-scale7 {-webkit-transform: scaleX(.7); -moz-transform: scaleX(.7); -ms-transform: scaleX(.7); -o-transform: scaleX(.7); transform: scaleX(.7)}
+.MJXp-scale8 {-webkit-transform: scaleX(.8); -moz-transform: scaleX(.8); -ms-transform: scaleX(.8); -o-transform: scaleX(.8); transform: scaleX(.8)}
+.MJXp-scale9 {-webkit-transform: scaleX(.9); -moz-transform: scaleX(.9); -ms-transform: scaleX(.9); -o-transform: scaleX(.9); transform: scaleX(.9)}
+.MathJax_PHTML .noError {vertical-align: ; font-size: 90%; text-align: left; color: black; padding: 1px 3px; border: 1px solid}
+</style></head>
+
+
+    <body data-gr-c-s-loaded="true"><div id="MathJax_Message" style="display: none;"></div>
+
+    <header class="site-header">
+
+  <div class="wrap title-wrap">
+    <a class="site-title" href="http://cs231n.github.io/">CS231n Convolutional Neural Networks for Visual Recognition</a>
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrap">
+      <div class="post">
+
+  <header class="post-header">
+    <h1>Google Cloud Tutorial Part 2 (with GPUs)</h1>
+  </header>
+
+  <article class="post-content">
+  <h1 id="google-cloud-tutorial-part-2-with-gpus">Google Cloud Tutorial (Part 2 With GPUs)</h1>
+<p>This tutorial assumes that you have already gone through the first Google Cloud tutorial for assignment 1 <a href="http://cs231n.github.io/gce-tutorial/" title="title">here</a>. The first tutorial takes you through the process of setting up a Google Cloud account, launching a VM instance, accessing Jupyter Notebook from your local computer, working on assignment 1 on your VM instance, and transferring files to your local computer. While you created a VM instance without a GPU in the first tutorial, this one walks you through the necessary steps to create an instance with a GPU, and use our provided disk images to work on assignment 2. If you haven’t already done so, we advise you to go through the first tutorial to be comfortable with the process of creating an instance with the right configurations and accessing Jupyter Notebook from your local computer.</p>
+
+<h2 id="changing-your-billing-account">Changing your Billing Account</h2>
+<p>Everyone enrolled in the class should have received $100 Google Cloud credits by now. In order to use GPUs, you have to use these coupons instead of your free trial credits. To do this, follow the instructions on <a href="https://support.google.com/cloud/answer/6293499?hl=en" title="Title">this website</a> to change the billing address associated with your project to <strong>CS 231n- Convolutional Neural Netwks for Visual Recog-Set 1</strong>.</p>
+
+<h2 id="requesting-gpu-quota-increase">Requesting GPU Quota Increase</h2>
+<p>To start an instance with a GPU (for the first time) you first need to request an increase in the number of GPUs you can use. To do this, go to your console, click on the <strong>Computer Engine</strong> button and select the <strong>Quotas</strong> menu. You will see a page that looks like the one below.</p>
+
+<div class="fig figcenter fighighlight">
+  <img src="./Google Cloud Tutorial Part 2 (with GPUs)_files/google-cloud-quotas-screen.png">
+</div>
+
+<p>Click on the blue <strong>Request Increase</strong> button. This opens a new tab with a long form titled <strong>Google Compute Engine Quota Change Request Form</strong> (see screenshot below).</p>
+<div class="fig figcenter fighighlight">
+  <img src="./Google Cloud Tutorial Part 2 (with GPUs)_files/google-cloud-quotas-form.png">
+</div>
+
+<p>Fill out the required portions of the form and put a value of <strong>1</strong> in the <strong>Total Number of GPU dies</strong> section. You only need to do this for the <strong>us-west1</strong> region… don’t request GPUs anywhere else, since all your instances should also live in us-west1.</p>
+
+<p>Once you have your quota increase you can just use GPUs (without requesting a quota increase). After you submit the form, you should receive an email approving your quota increase shortly after (I received my email within a minute). If you don’t receive your approval within 2 business days, please inform the course staff. Once you have received your quota increase, you can start an instance with a GPU. To do this, while launching a virtual instance as described in the <strong>Launch a Virtual Instance</strong> section <a href="http://cs231n.github.io/gce-tutorial/" title="title">here</a>, select the number of GPUs to be 1 (or 2 if you requested for a quota increase of 2 and you really really need to use 2). As a reminder, you can only use up to the number of GPUs allowed by your quota.</p>
+
+<p><strong>NOTE: Use your GPUs sparingly because they are expensive. See the pricing <a href="https://cloud.google.com/compute/pricing#gpus" title="title">here</a>.</strong> For example, in assignment 2, you only need to have a GPU instance for question 5. So you can work on all other parts of the assignment with a CPU instance that does <em>not</em> have any GPUs. Once you are done with the questions that do not require a GPU, you can transfer your assignment zip file to your local computer as discussed in the <strong>Transferring Files to Your Local Computer</strong> section below. When you get to question 5, start a GPU instance and transfer your zip file from your local computer to your instance. Refer to <a href="https://cloud.google.com/compute/docs/instances/transfer-files" title="title">this page</a> for details on transferring files to Google Cloud.</p>
+
+<h2 id="starting-your-instance-with-our-provided-disk">Starting Your Instance With Our Provided Disk</h2>
+<p>For the remaining assignments and the project, we provide you with disks containing the necessary software for the assignments and commonly used frameworks for the project. To use our disk, you first need to create your own custom image using our file, and use this custom image as the boot disk for your new VM instance.</p>
+
+<h3 id="creating-a-custom-image-using-our-disk">Creating a Custom Image Using Our Disk</h3>
+<p>To create your custom image using our provided disk, go to <strong>Compute Engine</strong>, then <strong>Images</strong> and click on the blue <strong>Create Image</strong> button at the top of the page. See the screenshot below.</p>
+<div class="fig figcenter fighighlight">
+  <img src="./Google Cloud Tutorial Part 2 (with GPUs)_files/google-cloud-create-image-screenshot.png">
+</div>
+
+<p>Enter your preferred name in the <strong>Name</strong> field. Mine is called <strong>final-cs231n</strong>. Select cloud storage file for <strong>Source</strong>, enter <strong>cs231n-files/cs231n_image.tar.gz</strong> as the <strong>Cloud Storage file</strong> and click on the blue <strong>Create</strong> button. See the screenshot below. It will take a few minutes for your image to be created (about 10-15 in our experience, though your mileage may vary).</p>
+
+<div class="fig figcenter fighighlight">
+  <img src="./Google Cloud Tutorial Part 2 (with GPUs)_files/google-cloud-select-cloud-storage.png">
+</div>
+
+<h3 id="starting-your-instance-with-your-custom-image">Starting Your Instance with Your Custom Image</h3>
+<p>To start your instance using our provided disk, go to <strong>VM Instances</strong> and click on <strong>Create Instance</strong> like you have done before. Make sure you start the instance in <strong>us-west1-b</strong>. Follow the same procedure that you have used to create an instance as detailed <a href="http://cs231n.github.io/gce-tutorial/" title="title">here</a> but with the following differences:</p>
+
+<p>Make sure to provision 1 GPU to your instance by clicking <strong>Customize</strong> in the <strong>Machine Type</strong> box, as in the screenshot below:</p>
+
+<div class="fig figcenter fighighlight">
+  <img src="./Google Cloud Tutorial Part 2 (with GPUs)_files/google-cloud-instance-gpus.png">
+</div>
+
+<p>Instead of selecting an entry in <strong>OS images</strong> for <strong>Boot disk</strong>, select <strong>Custom images</strong> and the custom image that you created above. Mine is <strong>final-cs231n</strong>. See the screenshot below.</p>
+
+<div class="fig figcenter fighighlight">
+  <img src="./Google Cloud Tutorial Part 2 (with GPUs)_files/google-cloud-select-custom-image.png">
+</div>
+
+<p>It should take about 5 minutes for the instance to get created. You should now be able to launch your instance with our custom image. The custom disk is 40GB and uses Ubuntu 16.04 LTS. 
+The default python version in the system is Python 2.7.2 and there is a virtual environment in <strong>/home/cs231n/myVE35</strong> with version 3.5.2.</p>
+
+<p><strong>NOTE:</strong> Some students have reported GPU instances whose drivers disappear upon restarts. And there is strong evidence to suggest that the issue happens when Ubuntu auto-installs security updates upon booting up. To disable auto-updating, run</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo apt-get remove unattended-upgrades
+</code></pre></div></div>
+
+<p>after logging into your instance for the first time.</p>
+
+<h3 id="load-the-virtual-environment">Load the virtual environment</h3>
+<p>You <strong>don’t need to create a new virtual environment</strong> for this assignment – we are providing you with one, with all the Python packages you need for the assignment already installed. So, unlike the previous assignment, you do not need to run any commands to create the virtual environment (and install packages, etc), just one command to activate it. To use this virtual environment, run the following command (you may have to do this every time you start your instance up, if you don’t see your bash prompt prefaced by “(myVE35)”):</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>source /home/cs231n/myVE35/bin/activate
+</code></pre></div></div>
+
+<p>Here’s what you should see after running that to confirm you’re in the virtual environment:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>username@instance-2:~$ source /home/cs231n/myVE35/bin/activate
+(myVE35) username@instance-2:~$ which python
+/home/cs231n/myVE35/bin/python
+(myVE35) username@instance-2:~$ 
+</code></pre></div></div>
+
+<p>The disk should also have Jupyter 1.0.0, CUDA 8.0, CUDNN 5.1, Pytorch 0.1.11_5 and TensorFlow 1.0.1. GPU support should be automatically enabled for PyTorch and TensorFlow.</p>
+
+<h3 id="getting-started-on-assignment-2">Getting started on Assignment 2</h3>
+<p>As in assignment 1, you can download the assignment zip file by running:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>wget http://cs231n.stanford.edu/assignments/2017/spring1617_assignment2.zip
+</code></pre></div></div>
+
+<p>You can unzip the assignment zip file by running:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo apt-get install zip #For when you need to zip the file to submit it.
+sudo apt-get install unzip
+unzip spring1617_assignment2.zip
+</code></pre></div></div>
+
+<p>Get back to the Assignment 2 instructions <a href="http://cs231n.github.io/assignments2017/assignment2/">here</a>. Follow the instructions starting from the <strong>Download data</strong> section.</p>
+
+<p><strong>NOTE: Some students have seen errors saying that an NVIDIA driver is not installed.</strong> If you see this error, follow the instructions <a href="https://cloud.google.com/compute/docs/gpus/add-gpus#install-driver-script" title="title">here</a> to run the script for <strong>Ubuntu 16.04 LTS or 16.10 - CUDA 8 with latest driver</strong> under <strong>Installing GPU drivers</strong>. I.e. copy and paste the script into a file, lets call the file install_cuda.sh. And then run</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo bash install_cuda.sh 
+</code></pre></div></div>
+
+<p>Once you run the script above, run the commands</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>nvidia-smi
+nvcc --version
+</code></pre></div></div>
+
+<p>to ensure that the drivers are installed.</p>
+
+<h2 id="transferring-files-to-your-local-computer">Transferring Files to Your Local Computer</h2>
+<p>After following assignment 2 instructions to run the submission script and create assignment2.zip, you can download that file directly from Jupyter. To do this, go to Jupyter Notebook and click on the zip file (in this case assignment2.zip). The file will be downloaded to your local computer. You can also use the <strong>gcloud compute copy-files</strong> command to transfer files as discussed in the <strong>Submission: Transferring Files From Your Instance To Your Computer</strong> section in <a href="http://cs231n.github.io/gce-tutorial/" title="title">the first GCE tutorial</a>.</p>
+
+<h1 id="big-reminder-make-sure-you-stop-your-instances">BIG REMINDER: Make sure you stop your instances!</h1>
+
+<p>Don’t forget to stop your instance when you are done (<strong>by clicking on the stop button at the top of the page showing your instances</strong>). You can restart your instance and the downloaded software will still be available. We have already had some students who left their instances running for many days and have ran out of credits. You will be charged per hour when your instance is running. This includes code development time. We encourage you to read up on Google Cloud, regularly keep track of your credits and not solely rely on our tutorials.</p>
+
+  </article>
+
+</div>
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrap">
+
+    <div class="footer-col-1 column">
+      <ul>
+        
+        <li>
+          <a href="https://github.com/cs231n">
+            <span class="icon github">
+              <svg version="1.1" class="github-icon-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 16 16" enable-background="new 0 0 16 16" xml:space="preserve">
+                <path fill-rule="evenodd" clip-rule="evenodd" fill="#C2C2C2" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761
+                c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32
+                c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472
+                c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037
+                C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65
+                c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261
+                c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082
+                c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129
+                c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"></path>
+              </svg>
+            </span>
+            <span class="username">cs231n</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://twitter.com/cs231n">
+            <span class="icon twitter">
+              <svg version="1.1" class="twitter-icon-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 16 16" enable-background="new 0 0 16 16" xml:space="preserve">
+                <path fill="#C2C2C2" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809
+                c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27
+                c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767
+                c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206
+                C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271
+                c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469
+                c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"></path>
+              </svg>
+            </span>
+            <span class="username">cs231n</span>
+          </a>
+        </li>
+        <li>
+          <a href="mailto:karpathy@cs.stanford.edu">karpathy@cs.stanford.edu</a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="footer-col-2 column">
+        
+    </div>
+
+    <div class="footer-col-3 column">
+      
+    </div>
+
+  </div>
+
+</footer>
+
+
+    <!-- mathjax -->
+    <script src="./Google Cloud Tutorial Part 2 (with GPUs)_files/MathJax.js" id=""></script>
+    
+</body></html>
