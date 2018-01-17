@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<!-- saved from url=(0039)http://cs231n.github.io/classification/ -->
+<html class="gr__cs231n_github_io"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>CS231n Convolutional Neural Networks for Visual Recognition</title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="Course materials and notes for Stanford class CS231n: Convolutional Neural Networks for Visual Recognition.">
+    <link rel="canonical" href="http://cs231n.github.io/classification/">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="./Image classification notes_files/main.css">
+
+    <!-- Google fonts -->
+    <link href="./Image classification notes_files/css" rel="stylesheet" type="text/css">
+
+    <!-- Google tracking -->
+    <script async="" src="http://www.google-analytics.com/analytics.js"></script><script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-46895817-2', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+    
+<style type="text/css">.MathJax_Hover_Frame {border-radius: .25em; -webkit-border-radius: .25em; -moz-border-radius: .25em; -khtml-border-radius: .25em; box-shadow: 0px 0px 15px #83A; -webkit-box-shadow: 0px 0px 15px #83A; -moz-box-shadow: 0px 0px 15px #83A; -khtml-box-shadow: 0px 0px 15px #83A; border: 1px solid #A6D ! important; display: inline-block; position: absolute}
+.MathJax_Menu_Button .MathJax_Hover_Arrow {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 4px; -webkit-border-radius: 4px; -moz-border-radius: 4px; -khtml-border-radius: 4px; font-family: 'Courier New',Courier; font-size: 9px; color: #F0F0F0}
+.MathJax_Menu_Button .MathJax_Hover_Arrow span {display: block; background-color: #AAA; border: 1px solid; border-radius: 3px; line-height: 0; padding: 4px}
+.MathJax_Hover_Arrow:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_Hover_Arrow:hover span {background-color: #CCC!important}
+</style><style type="text/css">#MathJax_About {position: fixed; left: 50%; width: auto; text-align: center; border: 3px outset; padding: 1em 2em; background-color: #DDDDDD; color: black; cursor: default; font-family: message-box; font-size: 120%; font-style: normal; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; border-radius: 15px; -webkit-border-radius: 15px; -moz-border-radius: 15px; -khtml-border-radius: 15px; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_About.MathJax_MousePost {outline: none}
+.MathJax_Menu {position: absolute; background-color: white; color: black; width: auto; padding: 5px 0px; border: 1px solid #CCCCCC; margin: 0; cursor: default; font: menu; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; border-radius: 5px; -webkit-border-radius: 5px; -moz-border-radius: 5px; -khtml-border-radius: 5px; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+.MathJax_MenuItem {padding: 1px 2em; background: transparent}
+.MathJax_MenuArrow {position: absolute; right: .5em; padding-top: .25em; color: #666666; font-size: .75em}
+.MathJax_MenuActive .MathJax_MenuArrow {color: white}
+.MathJax_MenuArrow.RTL {left: .5em; right: auto}
+.MathJax_MenuCheck {position: absolute; left: .7em}
+.MathJax_MenuCheck.RTL {right: .7em; left: auto}
+.MathJax_MenuRadioCheck {position: absolute; left: .7em}
+.MathJax_MenuRadioCheck.RTL {right: .7em; left: auto}
+.MathJax_MenuLabel {padding: 1px 2em 3px 1.33em; font-style: italic}
+.MathJax_MenuRule {border-top: 1px solid #DDDDDD; margin: 4px 3px}
+.MathJax_MenuDisabled {color: GrayText}
+.MathJax_MenuActive {background-color: #606872; color: white}
+.MathJax_MenuDisabled:focus, .MathJax_MenuLabel:focus {background-color: #E8E8E8}
+.MathJax_ContextMenu:focus {outline: none}
+.MathJax_ContextMenu .MathJax_MenuItem:focus {outline: none}
+#MathJax_AboutClose {top: .2em; right: .2em}
+.MathJax_Menu .MathJax_MenuClose {top: -10px; left: -10px}
+.MathJax_MenuClose {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; font-family: 'Courier New',Courier; font-size: 24px; color: #F0F0F0}
+.MathJax_MenuClose span {display: block; background-color: #AAA; border: 1.5px solid; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; line-height: 0; padding: 8px 0 6px}
+.MathJax_MenuClose:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_MenuClose:hover span {background-color: #CCC!important}
+.MathJax_MenuClose:hover:focus {outline: none}
+</style><style type="text/css">.MathJax_Preview .MJXf-math {color: inherit!important}
+</style><style type="text/css">.MJX_Assistive_MathML {position: absolute!important; top: 0; left: 0; clip: rect(1px, 1px, 1px, 1px); padding: 1px 0 0 0!important; border: 0!important; height: 1px!important; width: 1px!important; overflow: hidden!important; display: block!important; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none}
+.MJX_Assistive_MathML.MJX_Assistive_MathML_Block {width: 100%!important}
+</style><style type="text/css">#MathJax_Zoom {position: absolute; background-color: #F0F0F0; overflow: auto; display: block; z-index: 301; padding: .5em; border: 1px solid black; margin: 0; font-weight: normal; font-style: normal; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; -webkit-box-sizing: content-box; -moz-box-sizing: content-box; box-sizing: content-box; box-shadow: 5px 5px 15px #AAAAAA; -webkit-box-shadow: 5px 5px 15px #AAAAAA; -moz-box-shadow: 5px 5px 15px #AAAAAA; -khtml-box-shadow: 5px 5px 15px #AAAAAA; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_ZoomOverlay {position: absolute; left: 0; top: 0; z-index: 300; display: inline-block; width: 100%; height: 100%; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+#MathJax_ZoomFrame {position: relative; display: inline-block; height: 0; width: 0}
+#MathJax_ZoomEventTrap {position: absolute; left: 0; top: 0; z-index: 302; display: inline-block; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+</style><style type="text/css">.MathJax_Preview {color: #888}
+#MathJax_Message {position: fixed; left: 1em; bottom: 1.5em; background-color: #E6E6E6; border: 1px solid #959595; margin: 0px; padding: 2px 8px; z-index: 102; color: black; font-size: 80%; width: auto; white-space: nowrap}
+#MathJax_MSIE_Frame {position: absolute; top: 0; left: 0; width: 0px; z-index: 101; border: 0px; margin: 0px; padding: 0px}
+.MathJax_Error {color: #CC0000; font-style: italic}
+</style><style type="text/css">.MJXp-script {font-size: .8em}
+.MJXp-right {-webkit-transform-origin: right; -moz-transform-origin: right; -ms-transform-origin: right; -o-transform-origin: right; transform-origin: right}
+.MJXp-bold {font-weight: bold}
+.MJXp-italic {font-style: italic}
+.MJXp-scr {font-family: MathJax_Script,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-frak {font-family: MathJax_Fraktur,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-sf {font-family: MathJax_SansSerif,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-cal {font-family: MathJax_Caligraphic,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-mono {font-family: MathJax_Typewriter,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-largeop {font-size: 150%}
+.MJXp-largeop.MJXp-int {vertical-align: -.2em}
+.MJXp-math {display: inline-block; line-height: 1.2; text-indent: 0; font-family: 'Times New Roman',Times,STIXGeneral,serif; white-space: nowrap; border-collapse: collapse}
+.MJXp-display {display: block; text-align: center; margin: 1em 0}
+.MJXp-math span {display: inline-block}
+.MJXp-box {display: block!important; text-align: center}
+.MJXp-box:after {content: " "}
+.MJXp-rule {display: block!important; margin-top: .1em}
+.MJXp-char {display: block!important}
+.MJXp-mo {margin: 0 .15em}
+.MJXp-mfrac {margin: 0 .125em; vertical-align: .25em}
+.MJXp-denom {display: inline-table!important; width: 100%}
+.MJXp-denom > * {display: table-row!important}
+.MJXp-surd {vertical-align: top}
+.MJXp-surd > * {display: block!important}
+.MJXp-script-box > *  {display: table!important; height: 50%}
+.MJXp-script-box > * > * {display: table-cell!important; vertical-align: top}
+.MJXp-script-box > *:last-child > * {vertical-align: bottom}
+.MJXp-script-box > * > * > * {display: block!important}
+.MJXp-mphantom {visibility: hidden}
+.MJXp-munderover {display: inline-table!important}
+.MJXp-over {display: inline-block!important; text-align: center}
+.MJXp-over > * {display: block!important}
+.MJXp-munderover > * {display: table-row!important}
+.MJXp-mtable {vertical-align: .25em; margin: 0 .125em}
+.MJXp-mtable > * {display: inline-table!important; vertical-align: middle}
+.MJXp-mtr {display: table-row!important}
+.MJXp-mtd {display: table-cell!important; text-align: center; padding: .5em 0 0 .5em}
+.MJXp-mtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-mlabeledtr {display: table-row!important}
+.MJXp-mlabeledtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mlabeledtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-merror {background-color: #FFFF88; color: #CC0000; border: 1px solid #CC0000; padding: 1px 3px; font-style: normal; font-size: 90%}
+.MJXp-scale0 {-webkit-transform: scaleX(.0); -moz-transform: scaleX(.0); -ms-transform: scaleX(.0); -o-transform: scaleX(.0); transform: scaleX(.0)}
+.MJXp-scale1 {-webkit-transform: scaleX(.1); -moz-transform: scaleX(.1); -ms-transform: scaleX(.1); -o-transform: scaleX(.1); transform: scaleX(.1)}
+.MJXp-scale2 {-webkit-transform: scaleX(.2); -moz-transform: scaleX(.2); -ms-transform: scaleX(.2); -o-transform: scaleX(.2); transform: scaleX(.2)}
+.MJXp-scale3 {-webkit-transform: scaleX(.3); -moz-transform: scaleX(.3); -ms-transform: scaleX(.3); -o-transform: scaleX(.3); transform: scaleX(.3)}
+.MJXp-scale4 {-webkit-transform: scaleX(.4); -moz-transform: scaleX(.4); -ms-transform: scaleX(.4); -o-transform: scaleX(.4); transform: scaleX(.4)}
+.MJXp-scale5 {-webkit-transform: scaleX(.5); -moz-transform: scaleX(.5); -ms-transform: scaleX(.5); -o-transform: scaleX(.5); transform: scaleX(.5)}
+.MJXp-scale6 {-webkit-transform: scaleX(.6); -moz-transform: scaleX(.6); -ms-transform: scaleX(.6); -o-transform: scaleX(.6); transform: scaleX(.6)}
+.MJXp-scale7 {-webkit-transform: scaleX(.7); -moz-transform: scaleX(.7); -ms-transform: scaleX(.7); -o-transform: scaleX(.7); transform: scaleX(.7)}
+.MJXp-scale8 {-webkit-transform: scaleX(.8); -moz-transform: scaleX(.8); -ms-transform: scaleX(.8); -o-transform: scaleX(.8); transform: scaleX(.8)}
+.MJXp-scale9 {-webkit-transform: scaleX(.9); -moz-transform: scaleX(.9); -ms-transform: scaleX(.9); -o-transform: scaleX(.9); transform: scaleX(.9)}
+.MathJax_PHTML .noError {vertical-align: ; font-size: 90%; text-align: left; color: black; padding: 1px 3px; border: 1px solid}
+</style><style type="text/css">.MathJax_Display {text-align: center; margin: 1em 0em; position: relative; display: block!important; text-indent: 0; max-width: none; max-height: none; min-width: 0; min-height: 0; width: 100%}
+.MathJax .merror {background-color: #FFFF88; color: #CC0000; border: 1px solid #CC0000; padding: 1px 3px; font-style: normal; font-size: 90%}
+.MathJax .MJX-monospace {font-family: monospace}
+.MathJax .MJX-sans-serif {font-family: sans-serif}
+#MathJax_Tooltip {background-color: InfoBackground; color: InfoText; border: 1px solid black; box-shadow: 2px 2px 5px #AAAAAA; -webkit-box-shadow: 2px 2px 5px #AAAAAA; -moz-box-shadow: 2px 2px 5px #AAAAAA; -khtml-box-shadow: 2px 2px 5px #AAAAAA; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true'); padding: 3px 4px; z-index: 401; position: absolute; left: 0; top: 0; width: auto; height: auto; display: none}
+.MathJax {display: inline; font-style: normal; font-weight: normal; line-height: normal; font-size: 100%; font-size-adjust: none; text-indent: 0; text-align: left; text-transform: none; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; direction: ltr; max-width: none; max-height: none; min-width: 0; min-height: 0; border: 0; padding: 0; margin: 0}
+.MathJax:focus, body :focus .MathJax {display: inline-table}
+.MathJax.MathJax_FullWidth {text-align: center; display: table-cell!important; width: 10000em!important}
+.MathJax img, .MathJax nobr, .MathJax a {border: 0; padding: 0; margin: 0; max-width: none; max-height: none; min-width: 0; min-height: 0; vertical-align: 0; line-height: normal; text-decoration: none}
+img.MathJax_strut {border: 0!important; padding: 0!important; margin: 0!important; vertical-align: 0!important}
+.MathJax span {display: inline; position: static; border: 0; padding: 0; margin: 0; vertical-align: 0; line-height: normal; text-decoration: none}
+.MathJax nobr {white-space: nowrap!important}
+.MathJax img {display: inline!important; float: none!important}
+.MathJax * {transition: none; -webkit-transition: none; -moz-transition: none; -ms-transition: none; -o-transition: none}
+.MathJax_Processing {visibility: hidden; position: fixed; width: 0; height: 0; overflow: hidden}
+.MathJax_Processed {display: none!important}
+.MathJax_ExBox {display: block!important; overflow: hidden; width: 1px; height: 60ex; min-height: 0; max-height: none}
+.MathJax .MathJax_EmBox {display: block!important; overflow: hidden; width: 1px; height: 60em; min-height: 0; max-height: none}
+.MathJax_LineBox {display: table!important}
+.MathJax_LineBox span {display: table-cell!important; width: 10000em!important; min-width: 0; max-width: none; padding: 0; border: 0; margin: 0}
+.MathJax .MathJax_HitBox {cursor: text; background: white; opacity: 0; filter: alpha(opacity=0)}
+.MathJax .MathJax_HitBox * {filter: none; opacity: 1; background: transparent}
+#MathJax_Tooltip * {filter: none; opacity: 1; background: transparent}
+@font-face {font-family: MathJax_Blank; src: url('about:blank')}
+.MathJax .noError {vertical-align: ; font-size: 90%; text-align: left; color: black; padding: 1px 3px; border: 1px solid}
+</style></head>
+
+
+    <body data-gr-c-s-loaded="true"><div style="visibility: hidden; overflow: hidden; position: absolute; top: 0px; height: 1px; width: auto; padding: 0px; border: 0px; margin: 0px; text-align: left; text-indent: 0px; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal;"><div id="MathJax_Hidden"></div></div><div id="MathJax_Message" style="display: none;"></div>
+
+    <header class="site-header">
+
+  <div class="wrap title-wrap">
+    <a class="site-title" href="http://cs231n.github.io/">CS231n Convolutional Neural Networks for Visual Recognition</a>
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrap">
+      <div class="post">
+
+  <header class="post-header">
+    <h1></h1>
+  </header>
+
+  <article class="post-content">
+  <p>This is an introductory lecture designed to introduce people from outside of Computer Vision to the Image Classification problem, and the data-driven approach. The Table of Contents:</p>
+
+<ul>
+  <li><a href="http://cs231n.github.io/classification/#intro">Intro to Image Classification, data-driven approach, pipeline</a></li>
+  <li><a href="http://cs231n.github.io/classification/#nn">Nearest Neighbor Classifier</a>
+    <ul>
+      <li><a href="http://cs231n.github.io/classification/#knn">k-Nearest Neighbor</a></li>
+    </ul>
+  </li>
+  <li><a href="http://cs231n.github.io/classification/#val">Validation sets, Cross-validation, hyperparameter tuning</a></li>
+  <li><a href="http://cs231n.github.io/classification/#procon">Pros/Cons of Nearest Neighbor</a></li>
+  <li><a href="http://cs231n.github.io/classification/#summary">Summary</a></li>
+  <li><a href="http://cs231n.github.io/classification/#summaryapply">Summary: Applying kNN in practice</a></li>
+  <li><a href="http://cs231n.github.io/classification/#reading">Further Reading</a></li>
+</ul>
+
+<p><a name="intro"></a></p>
+
+<h2 id="image-classification">Image Classification</h2>
+
+<p><strong>Motivation</strong>. In this section we will introduce the Image Classification problem, which is the task of assigning an input image one label from a fixed set of categories. This is one of the core problems in Computer Vision that, despite its simplicity, has a large variety of practical applications. Moreover, as we will see later in the course, many other seemingly distinct Computer Vision tasks (such as object detection, segmentation) can be reduced to image classification.</p>
+
+<p><strong>Example</strong>. For example, in the image below an image classification model takes a single image and assigns probabilities to 4 labels, <em>{cat, dog, hat, mug}</em>. As shown in the image, keep in mind that to a computer an image is represented as one large 3-dimensional array of numbers. In this example, the cat image is 248 pixels wide, 400 pixels tall, and has three color channels Red,Green,Blue (or RGB for short). Therefore, the image consists of 248 x 400 x 3 numbers, or a total of 297,600 numbers. Each number is an integer that ranges from 0 (black) to 255 (white). Our task is to turn this quarter of a million numbers into a single label, such as <em>“cat”</em>.</p>
+
+<div class="fig figcenter fighighlight">
+  <img src="./Image classification notes_files/classify.png">
+  <div class="figcaption">The task in Image Classification is to predict a single label (or a distribution over labels as shown here to indicate our confidence) for a given image. Images are 3-dimensional arrays of integers from 0 to 255, of size Width x Height x 3. The 3 represents the three color channels Red, Green, Blue.</div>
+</div>
+
+<p><strong>Challenges</strong>. Since this task of recognizing a visual concept (e.g. cat) is relatively trivial for a human to perform, it is worth considering the challenges involved from the perspective of a Computer Vision algorithm. As we present (an inexhaustive) list of challenges below, keep in mind the raw representation of images as a 3-D array of brightness values:</p>
+
+<ul>
+  <li><strong>Viewpoint variation</strong>. A single instance of an object can be oriented in many ways with respect to the camera.</li>
+  <li><strong>Scale variation</strong>. Visual classes often exhibit variation in their size (size in the real world, not only in terms of their extent in the image).</li>
+  <li><strong>Deformation</strong>. Many objects of interest are not rigid bodies and can be deformed in extreme ways.</li>
+  <li><strong>Occlusion</strong>. The objects of interest can be occluded. Sometimes only a small portion of an object (as little as few pixels) could be visible.</li>
+  <li><strong>Illumination conditions</strong>. The effects of illumination are drastic on the pixel level.</li>
+  <li><strong>Background clutter</strong>. The objects of interest may <em>blend</em> into their environment, making them hard to identify.</li>
+  <li><strong>Intra-class variation</strong>. The classes of interest can often be relatively broad, such as <em>chair</em>. There are many different types of these objects, each with their own appearance.</li>
+</ul>
+
+<p>A good image classification model must be invariant to the cross product of all these variations, while simultaneously retaining sensitivity to the inter-class variations.</p>
+
+<div class="fig figcenter fighighlight">
+  <img src="./Image classification notes_files/challenges.jpeg">
+  <div class="figcaption"></div>
+</div>
+
+<p><strong>Data-driven approach</strong>. How might we go about writing an algorithm that can classify images into distinct categories? Unlike writing an algorithm for, for example, sorting a list of numbers, it is not obvious how one might write an algorithm for identifying cats in images. Therefore, instead of trying to specify what every one of the categories of interest look like directly in code, the approach that we will take is not unlike one you would take with a child: we’re going to provide the computer with many examples of each class and then develop learning algorithms that look at these examples and learn about the visual appearance of each class. This approach is referred to as a <em>data-driven approach</em>, since it relies on first accumulating a <em>training dataset</em> of labeled images. Here is an example of what such a dataset might look like:</p>
+
+<div class="fig figcenter fighighlight">
+  <img src="./Image classification notes_files/trainset.jpg">
+  <div class="figcaption">An example training set for four visual categories. In practice we may have thousands of categories and hundreds of thousands of images for each category.</div>
+</div>
+
+<p><strong>The image classification pipeline</strong>. We’ve seen that the task in Image Classification is to take an array of pixels that represents a single image and assign a label to it. Our complete pipeline can be formalized as follows:</p>
+
+<ul>
+  <li><strong>Input:</strong> Our input consists of a set of <em>N</em> images, each labeled with one of <em>K</em> different classes. We refer to this data as the <em>training set</em>.</li>
+  <li><strong>Learning:</strong> Our task is to use the training set to learn what every one of the classes looks like. We refer to this step as <em>training a classifier</em>, or <em>learning a model</em>.</li>
+  <li><strong>Evaluation:</strong> In the end, we evaluate the quality of the classifier by asking it to predict labels for a new set of images that it has never seen before. We will then compare the true labels of these images to the ones predicted by the classifier. Intuitively, we’re hoping that a lot of the predictions match up with the true answers  (which we call the <em>ground truth</em>).</li>
+</ul>
+
+<p><a name="nn"></a></p>
+
+<h3 id="nearest-neighbor-classifier">Nearest Neighbor Classifier</h3>
+<p>As our first approach, we will develop what we call a <strong>Nearest Neighbor Classifier</strong>. This classifier has nothing to do with Convolutional Neural Networks and it is very rarely used in practice, but it will allow us to get an idea about the basic approach to an image classification problem.</p>
+
+<p><strong>Example image classification dataset: CIFAR-10.</strong> One popular toy image classification dataset is the <a href="http://www.cs.toronto.edu/~kriz/cifar.html">CIFAR-10 dataset</a>. This dataset consists of 60,000 tiny images that are 32 pixels high and wide. Each image is labeled with one of 10 classes (for example <em>“airplane, automobile, bird, etc”</em>). These 60,000 images are partitioned into a training set of 50,000 images and a test set of 10,000 images. In the image below you can see 10 random example images from each one of the 10 classes:</p>
+
+<div class="fig figcenter fighighlight">
+  <img src="./Image classification notes_files/nn.jpg">
+  <div class="figcaption">Left: Example images from the <a href="http://www.cs.toronto.edu/~kriz/cifar.html">CIFAR-10 dataset</a>. Right: first column shows a few test images and next to each we show the top 10 nearest neighbors in the training set according to pixel-wise difference.</div>
+</div>
+
+<p>Suppose now that we are given the CIFAR-10 training set of 50,000 images (5,000 images for every one of the labels), and we wish to label the remaining 10,000. The nearest neighbor classifier will take a test image, compare it to every single one of the training images, and predict the label of the closest training image. In the image above and on the right you can see an example result of such a procedure for 10 example test images. Notice that in only about 3 out of 10 examples an image of the same class is retrieved, while in the other 7 examples this is not the case. For example, in the 8th row the nearest training image to the horse head is a red car, presumably due to the strong black background. As a result, this image of a horse would in this case be mislabeled as a car.</p>
+
+<p>You may have noticed that we left unspecified the details of exactly how we compare two images, which in this case are just two blocks of 32 x 32 x 3. One of the simplest possibilities is to compare the images pixel by pixel and add up all the differences. In other words, given two images and representing them as vectors <span class="MathJax_Preview" style="color: inherit; display: none;"></span><span class="MathJax" id="MathJax-Element-1-Frame" tabindex="0" style="position: relative;" data-mathml="&lt;math xmlns=&quot;http://www.w3.org/1998/Math/MathML&quot;&gt;&lt;msub&gt;&lt;mi&gt;I&lt;/mi&gt;&lt;mn&gt;1&lt;/mn&gt;&lt;/msub&gt;&lt;mo&gt;,&lt;/mo&gt;&lt;msub&gt;&lt;mi&gt;I&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msub&gt;&lt;/math&gt;" role="presentation"><nobr aria-hidden="true"><span class="math" id="MathJax-Span-1" style="width: 2.462em; display: inline-block;"><span style="display: inline-block; position: relative; width: 2.001em; height: 0px; font-size: 122%;"><span style="position: absolute; clip: rect(1.744em 1002em 2.871em -999.997em); top: -2.559em; left: 0em;"><span class="mrow" id="MathJax-Span-2"><span class="msubsup" id="MathJax-Span-3"><span style="display: inline-block; position: relative; width: 0.771em; height: 0px;"><span style="position: absolute; clip: rect(3.179em 1000.36em 4.152em -999.997em); top: -3.993em; left: 0em;"><span class="mi" id="MathJax-Span-4" style="font-family: STIXGeneral; font-style: italic;">I<span style="display: inline-block; overflow: hidden; height: 1px; width: 0.054em;"></span></span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="position: absolute; top: -3.84em; left: 0.361em;"><span class="mn" id="MathJax-Span-5" style="font-size: 70.7%; font-family: STIXGeneral;">1</span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span></span></span><span class="mo" id="MathJax-Span-6" style="font-family: STIXGeneral;">,</span><span class="msubsup" id="MathJax-Span-7" style="padding-left: 0.207em;"><span style="display: inline-block; position: relative; width: 0.771em; height: 0px;"><span style="position: absolute; clip: rect(3.179em 1000.36em 4.152em -999.997em); top: -3.993em; left: 0em;"><span class="mi" id="MathJax-Span-8" style="font-family: STIXGeneral; font-style: italic;">I<span style="display: inline-block; overflow: hidden; height: 1px; width: 0.054em;"></span></span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="position: absolute; top: -3.84em; left: 0.361em;"><span class="mn" id="MathJax-Span-9" style="font-size: 70.7%; font-family: STIXGeneral;">2</span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span></span></span></span><span style="display: inline-block; width: 0px; height: 2.564em;"></span></span></span><span style="display: inline-block; overflow: hidden; vertical-align: -0.247em; border-left: 0px solid; width: 0px; height: 1.128em;"></span></span></nobr><span class="MJX_Assistive_MathML" role="presentation"><math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>I</mi><mn>1</mn></msub><mo>,</mo><msub><mi>I</mi><mn>2</mn></msub></math></span></span><script type="math/tex" id="MathJax-Element-1"> I_1, I_2 </script> , a reasonable choice for comparing them might be the <strong>L1 distance</strong>:</p>
+
+<span class="MathJax_Preview" style="color: inherit; display: none;"></span><div class="MathJax_Display" style="text-align: center;"><span class="MathJax" id="MathJax-Element-2-Frame" tabindex="0" style="text-align: center; position: relative;" data-mathml="&lt;math xmlns=&quot;http://www.w3.org/1998/Math/MathML&quot; display=&quot;block&quot;&gt;&lt;msub&gt;&lt;mi&gt;d&lt;/mi&gt;&lt;mn&gt;1&lt;/mn&gt;&lt;/msub&gt;&lt;mo stretchy=&quot;false&quot;&gt;(&lt;/mo&gt;&lt;msub&gt;&lt;mi&gt;I&lt;/mi&gt;&lt;mn&gt;1&lt;/mn&gt;&lt;/msub&gt;&lt;mo&gt;,&lt;/mo&gt;&lt;msub&gt;&lt;mi&gt;I&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msub&gt;&lt;mo stretchy=&quot;false&quot;&gt;)&lt;/mo&gt;&lt;mo&gt;=&lt;/mo&gt;&lt;munder&gt;&lt;mo&gt;&amp;#x2211;&lt;/mo&gt;&lt;mrow class=&quot;MJX-TeXAtom-ORD&quot;&gt;&lt;mi&gt;p&lt;/mi&gt;&lt;/mrow&gt;&lt;/munder&gt;&lt;mrow&gt;&lt;mo&gt;|&lt;/mo&gt;&lt;mrow&gt;&lt;msubsup&gt;&lt;mi&gt;I&lt;/mi&gt;&lt;mn&gt;1&lt;/mn&gt;&lt;mi&gt;p&lt;/mi&gt;&lt;/msubsup&gt;&lt;mo&gt;&amp;#x2212;&lt;/mo&gt;&lt;msubsup&gt;&lt;mi&gt;I&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;mi&gt;p&lt;/mi&gt;&lt;/msubsup&gt;&lt;/mrow&gt;&lt;mo&gt;|&lt;/mo&gt;&lt;/mrow&gt;&lt;/math&gt;" role="presentation"><nobr aria-hidden="true"><span class="math" id="MathJax-Span-10" style="width: 12.041em; display: inline-block;"><span style="display: inline-block; position: relative; width: 9.839em; height: 0px; font-size: 122%;"><span style="position: absolute; clip: rect(2.103em 1009.74em 4.767em -999.997em); top: -3.225em; left: 0em;"><span class="mrow" id="MathJax-Span-11"><span class="msubsup" id="MathJax-Span-12"><span style="display: inline-block; position: relative; width: 0.925em; height: 0px;"><span style="position: absolute; clip: rect(3.179em 1000.51em 4.152em -999.997em); top: -3.993em; left: 0em;"><span class="mi" id="MathJax-Span-13" style="font-family: STIXGeneral; font-style: italic;">d<span style="display: inline-block; overflow: hidden; height: 1px; width: 0.054em;"></span></span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="position: absolute; top: -3.84em; left: 0.515em;"><span class="mn" id="MathJax-Span-14" style="font-size: 70.7%; font-family: STIXGeneral;">1</span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span></span></span><span class="mo" id="MathJax-Span-15" style="font-family: STIXGeneral;">(</span><span class="msubsup" id="MathJax-Span-16"><span style="display: inline-block; position: relative; width: 0.771em; height: 0px;"><span style="position: absolute; clip: rect(3.179em 1000.36em 4.152em -999.997em); top: -3.993em; left: 0em;"><span class="mi" id="MathJax-Span-17" style="font-family: STIXGeneral; font-style: italic;">I<span style="display: inline-block; overflow: hidden; height: 1px; width: 0.054em;"></span></span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="position: absolute; top: -3.84em; left: 0.361em;"><span class="mn" id="MathJax-Span-18" style="font-size: 70.7%; font-family: STIXGeneral;">1</span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span></span></span><span class="mo" id="MathJax-Span-19" style="font-family: STIXGeneral;">,</span><span class="msubsup" id="MathJax-Span-20" style="padding-left: 0.207em;"><span style="display: inline-block; position: relative; width: 0.771em; height: 0px;"><span style="position: absolute; clip: rect(3.179em 1000.36em 4.152em -999.997em); top: -3.993em; left: 0em;"><span class="mi" id="MathJax-Span-21" style="font-family: STIXGeneral; font-style: italic;">I<span style="display: inline-block; overflow: hidden; height: 1px; width: 0.054em;"></span></span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="position: absolute; top: -3.84em; left: 0.361em;"><span class="mn" id="MathJax-Span-22" style="font-size: 70.7%; font-family: STIXGeneral;">2</span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span></span></span><span class="mo" id="MathJax-Span-23" style="font-family: STIXGeneral;">)</span><span class="mo" id="MathJax-Span-24" style="font-family: STIXGeneral; padding-left: 0.31em;">=</span><span class="munderover" id="MathJax-Span-25" style="padding-left: 0.31em;"><span style="display: inline-block; position: relative; width: 1.283em; height: 0px;"><span style="position: absolute; clip: rect(2.871em 1001.18em 4.613em -999.997em); top: -3.993em; left: 0em;"><span class="mo" id="MathJax-Span-26" style="font-family: STIXSizeOneSym; vertical-align: -0.51em;">∑</span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="position: absolute; clip: rect(3.537em 1000.36em 4.408em -999.997em); top: -2.866em; left: 0.464em;"><span class="texatom" id="MathJax-Span-27"><span class="mrow" id="MathJax-Span-28"><span class="mi" id="MathJax-Span-29" style="font-size: 70.7%; font-family: STIXGeneral; font-style: italic;">p</span></span></span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span></span></span><span class="mrow" id="MathJax-Span-30" style="padding-left: 0.207em;"><span class="mo" id="MathJax-Span-31" style="vertical-align: 0.822em;"><span style="display: inline-block; position: relative; width: 0.259em; height: 0px;"><span style="position: absolute; font-family: STIXGeneral; top: -3.327em; left: 0em;">∣<span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="position: absolute; font-family: STIXGeneral; top: -3.071em; left: 0em;">∣<span style="display: inline-block; width: 0px; height: 3.998em;"></span></span></span></span><span class="mrow" id="MathJax-Span-32"><span class="msubsup" id="MathJax-Span-33"><span style="display: inline-block; position: relative; width: 0.873em; height: 0px;"><span style="position: absolute; clip: rect(3.179em 1000.36em 4.152em -999.997em); top: -3.993em; left: 0em;"><span class="mi" id="MathJax-Span-34" style="font-family: STIXGeneral; font-style: italic;">I<span style="display: inline-block; overflow: hidden; height: 1px; width: 0.054em;"></span></span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="position: absolute; clip: rect(3.537em 1000.41em 4.306em -999.997em); top: -4.506em; left: 0.464em;"><span class="mi" id="MathJax-Span-35" style="font-size: 70.7%; font-family: STIXGeneral; font-style: italic;">p</span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="position: absolute; clip: rect(3.384em 1000.41em 4.152em -999.997em); top: -3.686em; left: 0.361em;"><span class="mn" id="MathJax-Span-36" style="font-size: 70.7%; font-family: STIXGeneral;">1</span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span></span></span><span class="mo" id="MathJax-Span-37" style="font-family: STIXGeneral; padding-left: 0.259em;">−</span><span class="msubsup" id="MathJax-Span-38" style="padding-left: 0.259em;"><span style="display: inline-block; position: relative; width: 0.873em; height: 0px;"><span style="position: absolute; clip: rect(3.179em 1000.36em 4.152em -999.997em); top: -3.993em; left: 0em;"><span class="mi" id="MathJax-Span-39" style="font-family: STIXGeneral; font-style: italic;">I<span style="display: inline-block; overflow: hidden; height: 1px; width: 0.054em;"></span></span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="position: absolute; clip: rect(3.537em 1000.41em 4.306em -999.997em); top: -4.506em; left: 0.464em;"><span class="mi" id="MathJax-Span-40" style="font-size: 70.7%; font-family: STIXGeneral; font-style: italic;">p</span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="position: absolute; clip: rect(3.384em 1000.41em 4.152em -999.997em); top: -3.686em; left: 0.361em;"><span class="mn" id="MathJax-Span-41" style="font-size: 70.7%; font-family: STIXGeneral;">2</span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span></span></span></span><span class="mo" id="MathJax-Span-42" style="vertical-align: 0.822em;"><span style="display: inline-block; position: relative; width: 0.259em; height: 0px;"><span style="position: absolute; font-family: STIXGeneral; top: -3.327em; left: 0em;">∣<span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="position: absolute; font-family: STIXGeneral; top: -3.071em; left: 0em;">∣<span style="display: inline-block; width: 0px; height: 3.998em;"></span></span></span></span></span></span><span style="display: inline-block; width: 0px; height: 3.23em;"></span></span></span><span style="display: inline-block; overflow: hidden; vertical-align: -1.747em; border-left: 0px solid; width: 0px; height: 3.003em;"></span></span></nobr><span class="MJX_Assistive_MathML MJX_Assistive_MathML_Block" role="presentation"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><msub><mi>d</mi><mn>1</mn></msub><mo stretchy="false">(</mo><msub><mi>I</mi><mn>1</mn></msub><mo>,</mo><msub><mi>I</mi><mn>2</mn></msub><mo stretchy="false">)</mo><mo>=</mo><munder><mo>∑</mo><mrow class="MJX-TeXAtom-ORD"><mi>p</mi></mrow></munder><mrow><mo>|</mo><mrow><msubsup><mi>I</mi><mn>1</mn><mi>p</mi></msubsup><mo>−</mo><msubsup><mi>I</mi><mn>2</mn><mi>p</mi></msubsup></mrow><mo>|</mo></mrow></math></span></span></div><script type="math/tex; mode=display" id="MathJax-Element-2">d_1 (I_1, I_2) = \sum_{p} \left| I^p_1 - I^p_2 \right|</script>
+
+<p>Where the sum is taken over all pixels. Here is the procedure visualized:</p>
+
+<div class="fig figcenter fighighlight">
+  <img src="./Image classification notes_files/nneg.jpeg">
+  <div class="figcaption">An example of using pixel-wise differences to compare two images with L1 distance (for one color channel in this example). Two images are subtracted elementwise and then all differences are added up to a single number. If two images are identical the result will be zero. But if the images are very different the result will be large.</div>
+</div>
+
+<p>Let’s also look at how we might implement the classifier in code. First, let’s load the CIFAR-10 data into memory as 4 arrays: the training data/labels and the test data/labels. In the code below, <code class="highlighter-rouge">Xtr</code> (of size 50,000 x 32 x 32 x 3) holds all the images in the training set, and a corresponding 1-dimensional array <code class="highlighter-rouge">Ytr</code> (of length 50,000) holds the training labels (from 0 to 9):</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Xtr</span><span class="p">,</span> <span class="n">Ytr</span><span class="p">,</span> <span class="n">Xte</span><span class="p">,</span> <span class="n">Yte</span> <span class="o">=</span> <span class="n">load_CIFAR10</span><span class="p">(</span><span class="s">'data/cifar10/'</span><span class="p">)</span> <span class="c"># a magic function we provide</span>
+<span class="c"># flatten out all images to be one-dimensional</span>
+<span class="n">Xtr_rows</span> <span class="o">=</span> <span class="n">Xtr</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">Xtr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">32</span> <span class="o">*</span> <span class="mi">32</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span> <span class="c"># Xtr_rows becomes 50000 x 3072</span>
+<span class="n">Xte_rows</span> <span class="o">=</span> <span class="n">Xte</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">Xte</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">32</span> <span class="o">*</span> <span class="mi">32</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span> <span class="c"># Xte_rows becomes 10000 x 3072</span>
+</code></pre></div></div>
+
+<p>Now that we have all images stretched out as rows, here is how we could train and evaluate a classifier:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">nn</span> <span class="o">=</span> <span class="n">NearestNeighbor</span><span class="p">()</span> <span class="c"># create a Nearest Neighbor classifier class</span>
+<span class="n">nn</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">Xtr_rows</span><span class="p">,</span> <span class="n">Ytr</span><span class="p">)</span> <span class="c"># train the classifier on the training images and labels</span>
+<span class="n">Yte_predict</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Xte_rows</span><span class="p">)</span> <span class="c"># predict labels on the test images</span>
+<span class="c"># and now print the classification accuracy, which is the average number</span>
+<span class="c"># of examples that are correctly predicted (i.e. label matches)</span>
+<span class="k">print</span> <span class="s">'accuracy: </span><span class="si">%</span><span class="s">f'</span> <span class="o">%</span> <span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">Yte_predict</span> <span class="o">==</span> <span class="n">Yte</span><span class="p">)</span> <span class="p">)</span>
+</code></pre></div></div>
+
+<p>Notice that as an evaluation criterion, it is common to use the <strong>accuracy</strong>, which measures the fraction of predictions that were correct. Notice that all classifiers we will build satisfy this one common API: they have a <code class="highlighter-rouge">train(X,y)</code> function that takes the data and the labels to learn from. Internally, the class should build some kind of model of the labels and how they can be predicted from the data. And then there is a <code class="highlighter-rouge">predict(X)</code> function, which takes new data and predicts the labels. Of course, we’ve left out the meat of things - the actual classifier itself. Here is an implementation of a simple Nearest Neighbor classifier with the L1 distance that satisfies this template:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+
+<span class="k">class</span> <span class="nc">NearestNeighbor</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+  <span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="s">""" X is N x D where each row is an example. Y is 1-dimension of size N """</span>
+    <span class="c"># the nearest neighbor classifier simply remembers all the training data</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">Xtr</span> <span class="o">=</span> <span class="n">X</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ytr</span> <span class="o">=</span> <span class="n">y</span>
+
+  <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+    <span class="s">""" X is N x D where each row is an example we wish to predict label for """</span>
+    <span class="n">num_test</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="c"># lets make sure that the output type matches the input type</span>
+    <span class="n">Ypred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_test</span><span class="p">,</span> <span class="n">dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ytr</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+
+    <span class="c"># loop over all test rows</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">num_test</span><span class="p">):</span>
+      <span class="c"># find the nearest training image to the i'th test image</span>
+      <span class="c"># using the L1 distance (sum of absolute value differences)</span>
+      <span class="n">distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Xtr</span> <span class="o">-</span> <span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,:]),</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+      <span class="n">min_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">distances</span><span class="p">)</span> <span class="c"># get the index with smallest distance</span>
+      <span class="n">Ypred</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ytr</span><span class="p">[</span><span class="n">min_index</span><span class="p">]</span> <span class="c"># predict the label of the nearest example</span>
+
+    <span class="k">return</span> <span class="n">Ypred</span>
+</code></pre></div></div>
+
+<p>If you ran this code, you would see that this classifier only achieves <strong>38.6%</strong> on CIFAR-10. That’s more impressive than guessing at random (which would give 10% accuracy since there are 10 classes), but nowhere near human performance (which is <a href="http://karpathy.github.io/2011/04/27/manually-classifying-cifar10/">estimated at about 94%</a>) or near state-of-the-art Convolutional Neural Networks that achieve about 95%, matching human accuracy (see the <a href="http://www.kaggle.com/c/cifar-10/leaderboard">leaderboard</a> of a recent Kaggle competition on CIFAR-10).</p>
+
+<p><strong>The choice of distance.</strong> 
+There are many other ways of computing distances between vectors. Another common choice could be to instead use the <strong>L2 distance</strong>, which has the geometric interpretation of computing the euclidean distance between two vectors. The distance takes the form:</p>
+
+<span class="MathJax_Preview" style="color: inherit; display: none;"></span><div class="MathJax_Display" style="text-align: center;"><span class="MathJax" id="MathJax-Element-3-Frame" tabindex="0" style="text-align: center; position: relative;" data-mathml="&lt;math xmlns=&quot;http://www.w3.org/1998/Math/MathML&quot; display=&quot;block&quot;&gt;&lt;msub&gt;&lt;mi&gt;d&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msub&gt;&lt;mo stretchy=&quot;false&quot;&gt;(&lt;/mo&gt;&lt;msub&gt;&lt;mi&gt;I&lt;/mi&gt;&lt;mn&gt;1&lt;/mn&gt;&lt;/msub&gt;&lt;mo&gt;,&lt;/mo&gt;&lt;msub&gt;&lt;mi&gt;I&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msub&gt;&lt;mo stretchy=&quot;false&quot;&gt;)&lt;/mo&gt;&lt;mo&gt;=&lt;/mo&gt;&lt;msqrt&gt;&lt;munder&gt;&lt;mo&gt;&amp;#x2211;&lt;/mo&gt;&lt;mrow class=&quot;MJX-TeXAtom-ORD&quot;&gt;&lt;mi&gt;p&lt;/mi&gt;&lt;/mrow&gt;&lt;/munder&gt;&lt;msup&gt;&lt;mrow&gt;&lt;mo&gt;(&lt;/mo&gt;&lt;mrow&gt;&lt;msubsup&gt;&lt;mi&gt;I&lt;/mi&gt;&lt;mn&gt;1&lt;/mn&gt;&lt;mi&gt;p&lt;/mi&gt;&lt;/msubsup&gt;&lt;mo&gt;&amp;#x2212;&lt;/mo&gt;&lt;msubsup&gt;&lt;mi&gt;I&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;mi&gt;p&lt;/mi&gt;&lt;/msubsup&gt;&lt;/mrow&gt;&lt;mo&gt;)&lt;/mo&gt;&lt;/mrow&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msup&gt;&lt;/msqrt&gt;&lt;/math&gt;" role="presentation"><nobr aria-hidden="true"><span class="math" id="MathJax-Span-43" style="width: 14.398em; display: inline-block;"><span style="display: inline-block; position: relative; width: 11.785em; height: 0px; font-size: 122%;"><span style="position: absolute; clip: rect(1.078em 1011.78em 4.46em -999.997em); top: -2.559em; left: 0em;"><span class="mrow" id="MathJax-Span-44"><span class="msubsup" id="MathJax-Span-45"><span style="display: inline-block; position: relative; width: 0.925em; height: 0px;"><span style="position: absolute; clip: rect(3.179em 1000.51em 4.152em -999.997em); top: -3.993em; left: 0em;"><span class="mi" id="MathJax-Span-46" style="font-family: STIXGeneral; font-style: italic;">d<span style="display: inline-block; overflow: hidden; height: 1px; width: 0.054em;"></span></span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="position: absolute; top: -3.84em; left: 0.515em;"><span class="mn" id="MathJax-Span-47" style="font-size: 70.7%; font-family: STIXGeneral;">2</span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span></span></span><span class="mo" id="MathJax-Span-48" style="font-family: STIXGeneral;">(</span><span class="msubsup" id="MathJax-Span-49"><span style="display: inline-block; position: relative; width: 0.771em; height: 0px;"><span style="position: absolute; clip: rect(3.179em 1000.36em 4.152em -999.997em); top: -3.993em; left: 0em;"><span class="mi" id="MathJax-Span-50" style="font-family: STIXGeneral; font-style: italic;">I<span style="display: inline-block; overflow: hidden; height: 1px; width: 0.054em;"></span></span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="position: absolute; top: -3.84em; left: 0.361em;"><span class="mn" id="MathJax-Span-51" style="font-size: 70.7%; font-family: STIXGeneral;">1</span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span></span></span><span class="mo" id="MathJax-Span-52" style="font-family: STIXGeneral;">,</span><span class="msubsup" id="MathJax-Span-53" style="padding-left: 0.207em;"><span style="display: inline-block; position: relative; width: 0.771em; height: 0px;"><span style="position: absolute; clip: rect(3.179em 1000.36em 4.152em -999.997em); top: -3.993em; left: 0em;"><span class="mi" id="MathJax-Span-54" style="font-family: STIXGeneral; font-style: italic;">I<span style="display: inline-block; overflow: hidden; height: 1px; width: 0.054em;"></span></span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="position: absolute; top: -3.84em; left: 0.361em;"><span class="mn" id="MathJax-Span-55" style="font-size: 70.7%; font-family: STIXGeneral;">2</span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span></span></span><span class="mo" id="MathJax-Span-56" style="font-family: STIXGeneral;">)</span><span class="mo" id="MathJax-Span-57" style="font-family: STIXGeneral; padding-left: 0.31em;">=</span><span class="msqrt" id="MathJax-Span-58" style="padding-left: 0.31em;"><span style="display: inline-block; position: relative; width: 6.919em; height: 0px;"><span style="position: absolute; clip: rect(2.769em 1005.84em 5.535em -999.997em); top: -3.993em; left: 1.078em;"><span class="mrow" id="MathJax-Span-59"><span class="munderover" id="MathJax-Span-60"><span style="display: inline-block; position: relative; width: 1.283em; height: 0px;"><span style="position: absolute; clip: rect(2.871em 1001.18em 4.613em -999.997em); top: -3.993em; left: 0em;"><span class="mo" id="MathJax-Span-61" style="font-family: STIXSizeOneSym; vertical-align: -0.51em;">∑</span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="position: absolute; clip: rect(3.537em 1000.36em 4.408em -999.997em); top: -2.866em; left: 0.464em;"><span class="texatom" id="MathJax-Span-62"><span class="mrow" id="MathJax-Span-63"><span class="mi" id="MathJax-Span-64" style="font-size: 70.7%; font-family: STIXGeneral; font-style: italic;">p</span></span></span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span></span></span><span class="msubsup" id="MathJax-Span-65" style="padding-left: 0.207em;"><span style="display: inline-block; position: relative; width: 4.357em; height: 0px;"><span style="position: absolute; clip: rect(2.974em 1003.74em 4.511em -999.997em); top: -3.993em; left: 0em;"><span class="mrow" id="MathJax-Span-66"><span class="mo" id="MathJax-Span-67" style="vertical-align: -0.202em;"><span style="font-family: STIXSizeOneSym;">(</span></span><span class="mrow" id="MathJax-Span-68"><span class="msubsup" id="MathJax-Span-69"><span style="display: inline-block; position: relative; width: 0.873em; height: 0px;"><span style="position: absolute; clip: rect(3.179em 1000.36em 4.152em -999.997em); top: -3.993em; left: 0em;"><span class="mi" id="MathJax-Span-70" style="font-family: STIXGeneral; font-style: italic;">I<span style="display: inline-block; overflow: hidden; height: 1px; width: 0.054em;"></span></span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="position: absolute; clip: rect(3.537em 1000.41em 4.306em -999.997em); top: -4.506em; left: 0.464em;"><span class="mi" id="MathJax-Span-71" style="font-size: 70.7%; font-family: STIXGeneral; font-style: italic;">p</span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="position: absolute; clip: rect(3.384em 1000.41em 4.152em -999.997em); top: -3.686em; left: 0.361em;"><span class="mn" id="MathJax-Span-72" style="font-size: 70.7%; font-family: STIXGeneral;">1</span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span></span></span><span class="mo" id="MathJax-Span-73" style="font-family: STIXGeneral; padding-left: 0.259em;">−</span><span class="msubsup" id="MathJax-Span-74" style="padding-left: 0.259em;"><span style="display: inline-block; position: relative; width: 0.873em; height: 0px;"><span style="position: absolute; clip: rect(3.179em 1000.36em 4.152em -999.997em); top: -3.993em; left: 0em;"><span class="mi" id="MathJax-Span-75" style="font-family: STIXGeneral; font-style: italic;">I<span style="display: inline-block; overflow: hidden; height: 1px; width: 0.054em;"></span></span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="position: absolute; clip: rect(3.537em 1000.41em 4.306em -999.997em); top: -4.506em; left: 0.464em;"><span class="mi" id="MathJax-Span-76" style="font-size: 70.7%; font-family: STIXGeneral; font-style: italic;">p</span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="position: absolute; clip: rect(3.384em 1000.41em 4.152em -999.997em); top: -3.686em; left: 0.361em;"><span class="mn" id="MathJax-Span-77" style="font-size: 70.7%; font-family: STIXGeneral;">2</span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span></span></span></span><span class="mo" id="MathJax-Span-78" style="vertical-align: -0.202em;"><span style="font-family: STIXSizeOneSym;">)</span></span></span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="position: absolute; top: -4.608em; left: 3.896em;"><span class="mn" id="MathJax-Span-79" style="font-size: 70.7%; font-family: STIXGeneral;">2</span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span></span></span></span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="position: absolute; clip: rect(3.025em 1005.84em 3.384em -999.997em); top: -4.506em; left: 1.078em;"><span style="display: inline-block; position: relative; width: 5.843em; height: 0px;"><span style="position: absolute; font-family: STIXGeneral; top: -3.993em; left: 0em;">‾<span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="position: absolute; font-family: STIXGeneral; top: -3.993em; left: 5.33em;">‾<span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="font-family: STIXGeneral; position: absolute; top: -3.993em; left: 0.412em;">‾<span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="font-family: STIXGeneral; position: absolute; top: -3.993em; left: 0.873em;">‾<span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="font-family: STIXGeneral; position: absolute; top: -3.993em; left: 1.335em;">‾<span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="font-family: STIXGeneral; position: absolute; top: -3.993em; left: 1.796em;">‾<span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="font-family: STIXGeneral; position: absolute; top: -3.993em; left: 2.205em;">‾<span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="font-family: STIXGeneral; position: absolute; top: -3.993em; left: 2.666em;">‾<span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="font-family: STIXGeneral; position: absolute; top: -3.993em; left: 3.128em;">‾<span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="font-family: STIXGeneral; position: absolute; top: -3.993em; left: 3.537em;">‾<span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="font-family: STIXGeneral; position: absolute; top: -3.993em; left: 3.998em;">‾<span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="font-family: STIXGeneral; position: absolute; top: -3.993em; left: 4.46em;">‾<span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="font-family: STIXGeneral; position: absolute; top: -3.993em; left: 4.921em;">‾<span style="display: inline-block; width: 0px; height: 3.998em;"></span></span></span><span style="display: inline-block; width: 0px; height: 3.998em;"></span></span><span style="position: absolute; clip: rect(1.386em 1001.13em 4.767em -999.997em); top: -2.866em; left: 0em;"><span style="font-family: STIXSizeThreeSym;">√</span><span style="display: inline-block; width: 0px; height: 4.101em;"></span></span></span></span></span><span style="display: inline-block; width: 0px; height: 2.564em;"></span></span></span><span style="display: inline-block; overflow: hidden; vertical-align: -2.184em; border-left: 0px solid; width: 0px; height: 3.878em;"></span></span></nobr><span class="MJX_Assistive_MathML MJX_Assistive_MathML_Block" role="presentation"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><msub><mi>d</mi><mn>2</mn></msub><mo stretchy="false">(</mo><msub><mi>I</mi><mn>1</mn></msub><mo>,</mo><msub><mi>I</mi><mn>2</mn></msub><mo stretchy="false">)</mo><mo>=</mo><msqrt><munder><mo>∑</mo><mrow class="MJX-TeXAtom-ORD"><mi>p</mi></mrow></munder><msup><mrow><mo>(</mo><mrow><msubsup><mi>I</mi><mn>1</mn><mi>p</mi></msubsup><mo>−</mo><msubsup><mi>I</mi><mn>2</mn><mi>p</mi></msubsup></mrow><mo>)</mo></mrow><mn>2</mn></msup></msqrt></math></span></span></div><script type="math/tex; mode=display" id="MathJax-Element-3">d_2 (I_1, I_2) = \sqrt{\sum_{p} \left( I^p_1 - I^p_2 \right)^2}</script>
+
+<p>In other words we would be computing the pixelwise difference as before, but this time we square all of them, add them up and finally take the square root. In numpy, using the code from above we would need to only replace a single line of code. The line that computes the distances:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Xtr</span> <span class="o">-</span> <span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,:]),</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p>Note that I included the <code class="highlighter-rouge">np.sqrt</code> call above, but in a practical nearest neighbor application we could leave out the square root operation because square root is a <em>monotonic function</em>. That is, it scales the absolute sizes of the distances but it preserves the ordering, so the nearest neighbors with or without it are identical. If you ran the Nearest Neighbor classifier on CIFAR-10 with this distance, you would obtain <strong>35.4%</strong> accuracy (slightly lower than our L1 distance result).</p>
+
+<p><strong>L1 vs. L2.</strong> It is interesting to consider differences between the two metrics. In particular, the L2 distance is much more unforgiving than the L1 distance when it comes to differences between two vectors. That is, the L2 distance prefers many medium disagreements to one big one. L1 and L2 distances (or equivalently the L1/L2 norms of the differences between a pair of images) are the most commonly used special cases of a <a href="http://planetmath.org/vectorpnorm">p-norm</a>.</p>
+
+<p><a name="knn"></a></p>
+
+<h3 id="k---nearest-neighbor-classifier">k - Nearest Neighbor Classifier</h3>
+
+<p>You may have noticed that it is strange to only use the label of the nearest image when we wish to make a prediction. Indeed, it is almost always the case that one can do better by using what’s called a <strong>k-Nearest Neighbor Classifier</strong>. The idea is very simple: instead of finding the single closest image in the training set, we will find the top <strong>k</strong> closest images, and have them vote on the label of the test image. In particular, when <em>k = 1</em>, we recover the Nearest Neighbor classifier. Intuitively, higher values of <strong>k</strong> have a smoothing effect that makes the classifier more resistant to outliers:</p>
+
+<div class="fig figcenter fighighlight">
+  <img src="./Image classification notes_files/knn.jpeg">
+  <div class="figcaption">An example of the difference between Nearest Neighbor and a 5-Nearest Neighbor classifier, using 2-dimensional points and 3 classes (red, blue, green). The colored regions show the <b>decision boundaries</b> induced by the classifier with an L2 distance. The white regions show points that are ambiguously classified (i.e. class votes are tied for at least two classes). Notice that in the case of a NN classifier, outlier datapoints (e.g. green point in the middle of a cloud of blue points) create small islands of likely incorrect predictions, while the 5-NN classifier smooths over these irregularities, likely leading to better <b>generalization</b> on the test data (not shown). Also note that the gray regions in the 5-NN image are caused by ties in the votes among the nearest neighbors (e.g. 2 neighbors are red, next two neighbors are blue, last neighbor is green).</div>
+</div>
+
+<p>In practice, you will almost always want to use k-Nearest Neighbor. But what value of <em>k</em> should you use? We turn to this problem next.</p>
+
+<p><a name="val"></a></p>
+
+<h3 id="validation-sets-for-hyperparameter-tuning">Validation sets for Hyperparameter tuning</h3>
+
+<p>The k-nearest neighbor classifier requires a setting for <em>k</em>. But what number works best? Additionally, we saw that there are many different distance functions we could have used: L1 norm, L2 norm, there are many other choices we didn’t even consider (e.g. dot products). These choices are called <strong>hyperparameters</strong> and they come up very often in the design of many Machine Learning algorithms that learn from data. It’s often not obvious what values/settings one should choose.</p>
+
+<p>You might be tempted to suggest that we should try out many different values and see what works best. That is a fine idea and that’s indeed what we will do, but this must be done very carefully. In particular, <strong>we cannot use the test set for the purpose of tweaking hyperparameters</strong>. Whenever you’re designing Machine Learning algorithms, you should think of the test set as a very precious resource that should ideally never be touched until one time at the very end. Otherwise, the very real danger is that you may tune your hyperparameters to work well on the test set, but if you were to deploy your model you could see a significantly reduced performance. In practice, we would say that you <strong>overfit</strong> to the test set. Another way of looking at it is that if you tune your hyperparameters on the test set, you are effectively using the test set as the training set, and therefore the performance you achieve on it will be too optimistic with respect to what you might actually observe when you deploy your model. But if you only use the test set once at end, it remains a good proxy for measuring the <strong>generalization</strong> of your classifier (we will see much more discussion surrounding generalization later in the class).</p>
+
+<blockquote>
+  <p>Evaluate on the test set only a single time, at the very end.</p>
+</blockquote>
+
+<p>Luckily, there is a correct way of tuning the hyperparameters and it does not touch the test set at all. The idea is to split our training set in two: a slightly smaller training set, and what we call a <strong>validation set</strong>. Using CIFAR-10 as an example, we could for example use 49,000 of the training images for training, and leave 1,000 aside for validation. This validation set is essentially used as a fake test set to tune the hyper-parameters.</p>
+
+<p>Here is what this might look like in the case of CIFAR-10:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># assume we have Xtr_rows, Ytr, Xte_rows, Yte as before</span>
+<span class="c"># recall Xtr_rows is 50,000 x 3072 matrix</span>
+<span class="n">Xval_rows</span> <span class="o">=</span> <span class="n">Xtr_rows</span><span class="p">[:</span><span class="mi">1000</span><span class="p">,</span> <span class="p">:]</span> <span class="c"># take first 1000 for validation</span>
+<span class="n">Yval</span> <span class="o">=</span> <span class="n">Ytr</span><span class="p">[:</span><span class="mi">1000</span><span class="p">]</span>
+<span class="n">Xtr_rows</span> <span class="o">=</span> <span class="n">Xtr_rows</span><span class="p">[</span><span class="mi">1000</span><span class="p">:,</span> <span class="p">:]</span> <span class="c"># keep last 49,000 for train</span>
+<span class="n">Ytr</span> <span class="o">=</span> <span class="n">Ytr</span><span class="p">[</span><span class="mi">1000</span><span class="p">:]</span>
+
+<span class="c"># find hyperparameters that work best on the validation set</span>
+<span class="n">validation_accuracies</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">]:</span>
+  
+  <span class="c"># use a particular value of k and evaluation on validation data</span>
+  <span class="n">nn</span> <span class="o">=</span> <span class="n">NearestNeighbor</span><span class="p">()</span>
+  <span class="n">nn</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">Xtr_rows</span><span class="p">,</span> <span class="n">Ytr</span><span class="p">)</span>
+  <span class="c"># here we assume a modified NearestNeighbor class that can take a k as input</span>
+  <span class="n">Yval_predict</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Xval_rows</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="p">)</span>
+  <span class="n">acc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">Yval_predict</span> <span class="o">==</span> <span class="n">Yval</span><span class="p">)</span>
+  <span class="k">print</span> <span class="s">'accuracy: </span><span class="si">%</span><span class="s">f'</span> <span class="o">%</span> <span class="p">(</span><span class="n">acc</span><span class="p">,)</span>
+
+  <span class="c"># keep track of what works on the validation set</span>
+  <span class="n">validation_accuracies</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">acc</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p>By the end of this procedure, we could plot a graph that shows which values of <em>k</em> work best. We would then stick with this value and evaluate once on the actual test set.</p>
+
+<blockquote>
+  <p>Split your training set into training set and a validation set. Use validation set to tune all hyperparameters. At the end run a single time on the test set and report performance.</p>
+</blockquote>
+
+<p><strong>Cross-validation</strong>.
+In cases where the size of your training data (and therefore also the validation data) might be small, people sometimes use a more sophisticated technique for hyperparameter tuning called <strong>cross-validation</strong>. Working with our previous example, the idea is that instead of arbitrarily picking the first 1000 datapoints to be the validation set and rest training set, you can get a better and less noisy estimate of how well a certain value of <em>k</em> works by iterating over different validation sets and averaging the performance across these. For example, in 5-fold cross-validation, we would split the training data into 5 equal folds, use 4 of them for training, and 1 for validation. We would then iterate over which fold is the validation fold, evaluate the performance, and finally average the performance across the different folds.</p>
+
+<div class="fig figleft fighighlight">
+  <img src="./Image classification notes_files/cvplot.png">
+  <div class="figcaption">Example of a 5-fold cross-validation run for the parameter <b>k</b>. For each value of <b>k</b> we train on 4 folds and evaluate on the 5th. Hence, for each <b>k</b> we receive 5 accuracies on the validation fold (accuracy is the y-axis, each result is a point). The trend line is drawn through the average of the results for each <b>k</b> and the error bars indicate the standard deviation. Note that in this particular case, the cross-validation suggests that a value of about <b>k</b> = 7 works best on this particular dataset (corresponding to the peak in the plot). If we used more than 5 folds, we might expect to see a smoother (i.e. less noisy) curve.</div>
+  <div style="clear:both"></div>
+</div>
+
+<p><strong>In practice</strong>. In practice, people prefer to avoid cross-validation in favor of having a single validation split, since cross-validation can be computationally expensive. The splits people tend to use is between 50%-90% of the training data for training and rest for validation. However, this depends on multiple factors: For example if the number of hyperparameters is large you may prefer to use bigger validation splits. If the number of examples in the validation set is small (perhaps only a few hundred or so), it is safer to use cross-validation. Typical number of folds you can see in practice would be 3-fold, 5-fold or 10-fold cross-validation.</p>
+
+<div class="fig figcenter fighighlight">
+  <img src="./Image classification notes_files/crossval.jpeg">
+  <div class="figcaption">Common data splits. A training and test set is given. The training set is split into folds (for example 5 folds here). The folds 1-4 become the training set. One fold (e.g. fold 5 here in yellow) is denoted as the Validation fold and is used to tune the hyperparameters. Cross-validation goes a step further and iterates over the choice of which fold is the validation fold, separately from 1-5. This would be referred to as 5-fold cross-validation. In the very end once the model is trained and all the best hyperparameters were determined, the model is evaluated a single time on the test data (red).</div>
+</div>
+
+<p><a name="procon"></a></p>
+
+<p><strong>Pros and Cons of Nearest Neighbor classifier.</strong></p>
+
+<p>It is worth considering some advantages and drawbacks of the Nearest Neighbor classifier. Clearly, one advantage is that it is very simple to implement and understand. Additionally, the classifier takes no time to train, since all that is required is to store and possibly index the training data. However, we pay that computational cost at test time, since classifying a test example requires a comparison to every single training example. This is backwards, since in practice we often care about the test time efficiency much more than the efficiency at training time. In fact, the deep neural networks we will develop later in this class shift this tradeoff to the other extreme: They are very expensive to train, but once the training is finished it is very cheap to classify a new test example. This mode of operation is much more desirable in practice.</p>
+
+<p>As an aside, the computational complexity of the Nearest Neighbor classifier is an active area of research, and several <strong>Approximate Nearest Neighbor</strong> (ANN) algorithms and libraries exist that can accelerate the nearest neighbor lookup in a dataset (e.g. <a href="http://www.cs.ubc.ca/research/flann/">FLANN</a>). These algorithms allow one to trade off the correctness of the nearest neighbor retrieval with its space/time complexity during retrieval, and usually rely on a pre-processing/indexing stage that involves building a kdtree, or running the k-means algorithm.</p>
+
+<p>The Nearest Neighbor Classifier may sometimes be a good choice in some settings (especially if the data is low-dimensional), but it is rarely appropriate for use in practical image classification settings. One problem is that images are high-dimensional objects (i.e. they often contain many pixels), and distances over high-dimensional spaces can be very counter-intuitive. The image below illustrates the point that the pixel-based L2 similarities we developed above are very different from perceptual similarities:</p>
+
+<div class="fig figcenter fighighlight">
+  <img src="./Image classification notes_files/samenorm.png">
+  <div class="figcaption">Pixel-based distances on high-dimensional data (and images especially) can be very unintuitive. An original image (left) and three other images next to it that are all equally far away from it based on L2 pixel distance. Clearly, the pixel-wise distance does not correspond at all to perceptual or semantic similarity.</div>
+</div>
+
+<p>Here is one more visualization to convince you that using pixel differences to compare images is inadequate. We can use a visualization technique called <a href="http://homepage.tudelft.nl/19j49/t-SNE.html">t-SNE</a> to take the CIFAR-10 images and embed them in two dimensions so that their (local) pairwise distances are best preserved. In this visualization, images that are shown nearby are considered to be very near according to the L2 pixelwise distance we developed above:</p>
+
+<div class="fig figcenter fighighlight">
+  <img src="./Image classification notes_files/pixels_embed_cifar10.jpg">
+  <div class="figcaption">CIFAR-10 images embedded in two dimensions with t-SNE. Images that are nearby on this image are considered to be close based on the L2 pixel distance. Notice the strong effect of background rather than semantic class differences. Click <a href="http://cs231n.github.io/assets/pixels_embed_cifar10_big.jpg">here</a> for a bigger version of this visualization.</div>
+</div>
+
+<p>In particular, note that images that are nearby each other are much more a function of the general color distribution of the images, or the type of background rather than their semantic identity. For example, a dog can be seen very near a frog since both happen to be on white background. Ideally we would like images of all of the 10 classes to form their own clusters, so that images of the same class are nearby to each other regardless of irrelevant characteristics and variations (such as the background). However, to get this property we will have to go beyond raw pixels.</p>
+
+<p><a name="summary"></a></p>
+
+<h3 id="summary">Summary</h3>
+
+<p>In summary:</p>
+
+<ul>
+  <li>We introduced the problem of <strong>Image Classification</strong>, in which we are given a set of images that are all labeled with a single category. We are then asked to predict these categories for a novel set of test images and measure the accuracy of the predictions.</li>
+  <li>We introduced a simple classifier called the <strong>Nearest Neighbor classifier</strong>. We saw that there are multiple hyper-parameters (such as value of k, or the type of distance used to compare examples) that are associated with this classifier and that there was no obvious way of choosing them.</li>
+  <li>We saw that the correct way to set these hyperparameters is to split your training data into two: a training set and a fake test set, which we call <strong>validation set</strong>. We try different hyperparameter values and keep the values that lead to the best performance on the validation set.</li>
+  <li>If the lack of training data is a concern, we discussed a procedure called <strong>cross-validation</strong>, which can help reduce noise in estimating which hyperparameters work best.</li>
+  <li>Once the best hyperparameters are found, we fix them and perform a single <strong>evaluation</strong> on the actual test set.</li>
+  <li>We saw that Nearest Neighbor can get us about 40% accuracy on CIFAR-10. It is simple to implement but requires us to store the entire training set and it is expensive to evaluate on a test image.</li>
+  <li>Finally, we saw that the use of L1 or L2 distances on raw pixel values is not adequate since the distances correlate more strongly with backgrounds and color distributions of images than with their semantic content.</li>
+</ul>
+
+<p>In next lectures we will embark on addressing these challenges and eventually arrive at solutions that give 90% accuracies, allow us to completely discard the training set once learning is complete, and they will allow us to evaluate a test image in less than a millisecond.</p>
+
+<p><a name="summaryapply"></a></p>
+
+<h3 id="summary-applying-knn-in-practice">Summary: Applying kNN in practice</h3>
+
+<p>If you wish to apply kNN in practice (hopefully not on images, or perhaps as only a baseline) proceed as follows:</p>
+
+<ol>
+  <li>Preprocess your data: Normalize the features in your data (e.g. one pixel in images) to have zero mean and unit variance. We will cover this in more detail in later sections, and chose not to cover data normalization in this section because pixels in images are usually homogeneous and do not exhibit widely different distributions, alleviating the need for data normalization.</li>
+  <li>If your data is very high-dimensional, consider using a dimensionality reduction technique such as PCA (<a href="http://en.wikipedia.org/wiki/Principal_component_analysis">wiki ref</a>, <a href="http://cs229.stanford.edu/notes/cs229-notes10.pdf">CS229ref</a>, <a href="http://www.bigdataexaminer.com/understanding-dimensionality-reduction-principal-component-analysis-and-singular-value-decomposition/">blog ref</a>) or even <a href="http://scikit-learn.org/stable/modules/random_projection.html">Random Projections</a>.</li>
+  <li>Split your training data randomly into train/val splits. As a rule of thumb, between 70-90% of your data usually goes to the train split. This setting depends on how many hyperparameters you have and how much of an influence you expect them to have. If there are many hyperparameters to estimate, you should err on the side of having larger validation set to estimate them effectively. If you are concerned about the size of your validation data, it is best to split the training data into folds and perform cross-validation. If you can afford the computational budget it is always safer to go with cross-validation (the more folds the better, but more expensive).</li>
+  <li>Train and evaluate the kNN classifier on the validation data (for all folds, if doing cross-validation) for many choices of <strong>k</strong> (e.g. the more the better) and across different distance types (L1 and L2 are good candidates)</li>
+  <li>If your kNN classifier is running too long, consider using an Approximate Nearest Neighbor library (e.g. <a href="http://www.cs.ubc.ca/research/flann/">FLANN</a>) to accelerate the retrieval (at cost of some accuracy).</li>
+  <li>Take note of the hyperparameters that gave the best results. There is a question of whether you should use the full training set with the best hyperparameters, since the optimal hyperparameters might change if you were to fold the validation data into your training set (since the size of the data would be larger). In practice it is cleaner to not use the validation data in the final classifier and consider it to be <em>burned</em> on estimating the hyperparameters. Evaluate the best model on the test set. Report the test set accuracy and declare the result to be the performance of the kNN classifier on your data.</li>
+</ol>
+
+<p><a name="reading"></a></p>
+
+<h4 id="further-reading">Further Reading</h4>
+
+<p>Here are some (optional) links you may find interesting for further reading:</p>
+
+<ul>
+  <li>
+    <p><a href="http://homes.cs.washington.edu/~pedrod/papers/cacm12.pdf">A Few Useful Things to Know about Machine Learning</a>, where especially section 6 is related but the whole paper is a warmly recommended reading.</p>
+  </li>
+  <li>
+    <p><a href="http://people.csail.mit.edu/torralba/shortCourseRLOC/index.html">Recognizing and Learning Object Categories</a>, a short course of object categorization at ICCV 2005.</p>
+  </li>
+</ul>
+
+  </article>
+
+</div>
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrap">
+
+    <div class="footer-col-1 column">
+      <ul>
+        
+        <li>
+          <a href="https://github.com/cs231n">
+            <span class="icon github">
+              <svg version="1.1" class="github-icon-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 16 16" enable-background="new 0 0 16 16" xml:space="preserve">
+                <path fill-rule="evenodd" clip-rule="evenodd" fill="#C2C2C2" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761
+                c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32
+                c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472
+                c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037
+                C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65
+                c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261
+                c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082
+                c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129
+                c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"></path>
+              </svg>
+            </span>
+            <span class="username">cs231n</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://twitter.com/cs231n">
+            <span class="icon twitter">
+              <svg version="1.1" class="twitter-icon-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 16 16" enable-background="new 0 0 16 16" xml:space="preserve">
+                <path fill="#C2C2C2" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809
+                c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27
+                c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767
+                c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206
+                C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271
+                c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469
+                c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"></path>
+              </svg>
+            </span>
+            <span class="username">cs231n</span>
+          </a>
+        </li>
+        <li>
+          <a href="mailto:karpathy@cs.stanford.edu">karpathy@cs.stanford.edu</a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="footer-col-2 column">
+        
+    </div>
+
+    <div class="footer-col-3 column">
+      
+    </div>
+
+  </div>
+
+</footer>
+
+
+    <!-- mathjax -->
+    <script src="./Image classification notes_files/MathJax.js" id=""></script>
+    
+<div style="position: absolute; width: 0px; height: 0px; overflow: hidden; padding: 0px; border: 0px; margin: 0px;"><div id="MathJax_Font_Test" style="position: absolute; visibility: hidden; top: 0px; left: 0px; width: auto; padding: 0px; border: 0px; margin: 0px; white-space: nowrap; text-align: left; text-indent: 0px; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; font-size: 40px; font-weight: normal; font-style: normal; font-family: STIXSizeOneSym, sans-serif;"></div></div></body></html>
