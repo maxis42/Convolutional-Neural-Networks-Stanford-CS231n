@@ -136,7 +136,7 @@ class FullyConnectedNet(object):
     """
 
     def __init__(self, hidden_dims, input_dim=3*32*32, num_classes=10,
-                 dropout=0, use_batchnorm=False, reg=0.0,
+                 dropout=1, normalization=None, reg=0.0,
                  weight_scale=1e-2, dtype=np.float32, seed=None):
         """
         Initialize a new FullyConnectedNet.
@@ -145,9 +145,10 @@ class FullyConnectedNet(object):
         - hidden_dims: A list of integers giving the size of each hidden layer.
         - input_dim: An integer giving the size of the input.
         - num_classes: An integer giving the number of classes to classify.
-        - dropout: Scalar between 0 and 1 giving dropout strength. If dropout=0 then
+        - dropout: Scalar between 0 and 1 giving dropout strength. If dropout=1 then
           the network should not use dropout at all.
-        - use_batchnorm: Whether or not the network should use batch normalization.
+        - normalization: What type of normalization the network should use. Valid values
+          are "batchnorm", "layernorm", or None for no normalization (the default).
         - reg: Scalar giving L2 regularization strength.
         - weight_scale: Scalar giving the standard deviation for random
           initialization of the weights.
@@ -158,8 +159,8 @@ class FullyConnectedNet(object):
           will make the dropout layers deteriminstic so we can gradient check the
           model.
         """
-        self.use_batchnorm = use_batchnorm
-        self.use_dropout = dropout > 0
+        self.normalization = normalization
+        self.use_dropout = dropout < 1
         self.reg = reg
         self.num_layers = 1 + len(hidden_dims)
         self.dtype = dtype
@@ -186,7 +187,7 @@ class FullyConnectedNet(object):
             input_dim_last = hidden_dims[i-1]
 
             # batchnorm layer parameters
-            if self.use_batchnorm:
+            if self.normalization=='batchnorm':
                 self.params['gamma%d' % i] = np.ones(hidden_dims[i-1])
                 self.params['beta%d' % i] = np.zeros(hidden_dims[i-1])
 
@@ -212,8 +213,10 @@ class FullyConnectedNet(object):
         # of the first batch normalization layer, self.bn_params[1] to the forward
         # pass of the second batch normalization layer, etc.
         self.bn_params = []
-        if self.use_batchnorm:
+        if self.normalization=='batchnorm':
             self.bn_params = [{'mode': 'train'} for i in range(self.num_layers - 1)]
+        if self.normalization=='layernorm':
+            self.bn_params = [{} for i in range(self.num_layers - 1)]
 
         # Cast all parameters to the correct datatype
         for k, v in self.params.items():
@@ -233,7 +236,7 @@ class FullyConnectedNet(object):
         # behave differently during training and testing.
         if self.use_dropout:
             self.dropout_param['mode'] = mode
-        if self.use_batchnorm:
+        if self.normalization=='batchnorm':
             for bn_param in self.bn_params:
                 bn_param['mode'] = mode
 
@@ -264,7 +267,7 @@ class FullyConnectedNet(object):
             next_layer_input = out['affine_%d' % i]
 
             # batchnorm layer
-            if self.use_batchnorm:
+            if self.normalization=='batchnorm':
                 out['batchnorm_%d' % i], cache['batchnorm_%d' % i] = batchnorm_forward(next_layer_input, self.params['gamma%d' % i], self.params['beta%d' % i], self.bn_params[i-1])
                 next_layer_input = out['batchnorm_%d' % i]
 
@@ -330,7 +333,7 @@ class FullyConnectedNet(object):
             dout = relu_backward(dout, cache['relu_%d' % i])
 
             # batchnorm layer
-            if self.use_batchnorm:
+            if self.normalization=='batchnorm':
                 dout, grads['gamma%d' % i], grads['beta%d' % i] = batchnorm_backward_alt(dout, cache['batchnorm_%d' % i])
 
             # affine layer

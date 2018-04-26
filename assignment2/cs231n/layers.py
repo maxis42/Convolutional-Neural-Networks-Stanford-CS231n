@@ -341,6 +341,123 @@ def batchnorm_backward_alt(dout, cache):
     return dx, dgamma, dbeta
 
 
+def layernorm_forward(x, gamma, beta, ln_param):
+    """
+    Forward pass for layer normalization.
+
+    During both training and test-time, the incoming data is normalized per data-point,
+    before being scaled by gamma and beta parameters identical to that of batch normalization.
+
+    Note that in contrast to batch normalization, the behavior during train and test-time for
+    layer normalization are identical, and we do not need to keep track of running averages
+    of any sort.
+
+    Input:
+    - x: Data of shape (N, D)
+    - gamma: Scale parameter of shape (D,)
+    - beta: Shift paremeter of shape (D,)
+    - ln_param: Dictionary with the following keys:
+        - eps: Constant for numeric stability
+
+    Returns a tuple of:
+    - out: of shape (N, D)
+    - cache: A tuple of values needed in the backward pass
+    """
+    out, cache = None, None
+    eps = ln_param.get('eps', 1e-5)
+    ###########################################################################
+    # TODO: Implement the training-time forward pass for layer norm.          #
+    # Normalize the incoming data, and scale and  shift the normalized data   #
+    #  using gamma and beta.                                                  #
+    # HINT: this can be done by slightly modifying your training-time         #
+    # implementation of batch normalization, and inserting a line or two of   #
+    # well-placed code. In particular, can you think of any matrix            #
+    # transformations you could perform, that would enable you to copy over   #
+    # the batch norm code and leave it almost unchanged?                      #
+    ###########################################################################
+    x = x.T  # (D, N)
+
+    sample_mean = np.mean(x, axis=0)  # (N,)
+    sample_var = np.var(x, axis=0)  # (N,)
+    var_corr_root = np.sqrt(sample_var + eps)  # (N,)
+    x_norm = (x - sample_mean)/var_corr_root
+
+    x = x.T
+    x_norm = x_norm.T
+
+    out = gamma*x_norm + beta
+
+    cache = (gamma, x_norm, var_corr_root)
+    # out, cache = batchnorm_forward(x.T, gamma[:,None], beta[:,None], ln_param)
+    # out = out.T
+    ###########################################################################
+    #                             END OF YOUR CODE                            #
+    ###########################################################################
+    return out, cache
+
+
+def layernorm_backward(dout, cache):
+    """
+    Backward pass for layer normalization.
+
+    For this implementation, you can heavily rely on the work you've done already
+    for batch normalization.
+
+    Inputs:
+    - dout: Upstream derivatives, of shape (N, D)
+    - cache: Variable of intermediates from layernorm_forward.
+
+    Returns a tuple of:
+    - dx: Gradient with respect to inputs x, of shape (N, D)
+    - dgamma: Gradient with respect to scale parameter gamma, of shape (D,)
+    - dbeta: Gradient with respect to shift parameter beta, of shape (D,)
+    """
+    dx, dgamma, dbeta = None, None, None
+    ###########################################################################
+    # TODO: Implement the backward pass for layer norm.                       #
+    #                                                                         #
+    # HINT: this can be done by slightly modifying your training-time         #
+    # implementation of batch normalization. The hints to the forward pass    #
+    # still apply!                                                            #
+    ###########################################################################
+    gamma, x_norm, var_corr_root = cache
+
+    dgamma = np.sum(x_norm * dout, axis=0)  # sum((N, D) * (N, D)) = (D,)
+    dbeta = np.sum(dout, axis=0)  # (D,)
+
+    x_norm = x_norm.T
+
+    dxnorm = gamma * dout  # (D,) * (N, D) = (N, D)
+    dxnorm = dxnorm.T
+
+    # NOTE: dimensions in the comments are inverted
+    dmult1 = 1 / var_corr_root * dxnorm  # (N, D)
+    dmult2 = np.sum(x_norm * var_corr_root * dxnorm, axis=0)  # (D,)
+
+    dmult2 = -1 / var_corr_root**2 * dmult2  # (D,)
+
+    dmult2 = 0.5 / var_corr_root * dmult2  # (D,)
+
+    N, D = x_norm.shape
+    dmult2 = 1 / N * np.ones((N, D)) * dmult2  # (N, D)
+
+    dmult2 = 2 * x_norm * var_corr_root * dmult2  # (N, D)
+
+    dx = dmult1 + dmult2  # (N, D)
+
+    dterm1 = 1 * dx  # (N, D)
+    dterm2 = -1 * np.sum(dx, axis=0)  # (D,)
+
+    dterm2 = 1/N * np.ones((N, D)) * dterm2  # (N, D)
+
+    dx = dterm1 + dterm2  # (N, D)
+    dx = dx.T
+    ###########################################################################
+    #                             END OF YOUR CODE                            #
+    ###########################################################################
+    return dx, dgamma, dbeta
+
+
 def dropout_forward(x, dropout_param):
     """
     Performs the forward pass for (inverted) dropout.
@@ -348,7 +465,7 @@ def dropout_forward(x, dropout_param):
     Inputs:
     - x: Input data, of any shape
     - dropout_param: A dictionary with the following keys:
-      - p: Dropout parameter. We drop each neuron output with probability p.
+      - p: Dropout parameter. We keep each neuron output with probability p.
       - mode: 'test' or 'train'. If the mode is train, then perform dropout;
         if the mode is test, then just return the input.
       - seed: Seed for the random number generator. Passing seed makes this
@@ -359,6 +476,13 @@ def dropout_forward(x, dropout_param):
     - out: Array of the same shape as x.
     - cache: tuple (dropout_param, mask). In training mode, mask is the dropout
       mask that was used to multiply the input; in test mode, mask is None.
+
+    NOTE: Please implement **inverted** dropout, not the vanilla version of dropout.
+    See http://cs231n.github.io/neural-networks-2/#reg for more details.
+
+    NOTE 2: Keep in mind that p is the probability of **keep** a neuron
+    output; this might be contrary to some sources, where it is referred to
+    as the probability of dropping a neuron output.
     """
     p, mode = dropout_param['p'], dropout_param['mode']
     if 'seed' in dropout_param:
@@ -697,6 +821,112 @@ def spatial_batchnorm_backward(dout, cache):
     #                             END OF YOUR CODE                            #
     ###########################################################################
 
+    return dx, dgamma, dbeta
+
+
+def spatial_groupnorm_forward(x, gamma, beta, G, gn_param):
+    """
+    Computes the forward pass for spatial group normalization.
+    In contrast to layer normalization, group normalization splits each entry
+    in the data into G contiguous pieces, which it then normalizes independently.
+    Per feature shifting and scaling are then applied to the data, in a manner identical to that of batch normalization and layer normalization.
+
+    Inputs:
+    - x: Input data of shape (N, C, H, W)
+    - gamma: Scale parameter, of shape (C,)
+    - beta: Shift parameter, of shape (C,)
+    - G: Integer mumber of groups to split into, should be a divisor of C
+    - gn_param: Dictionary with the following keys:
+      - eps: Constant for numeric stability
+
+    Returns a tuple of:
+    - out: Output data, of shape (N, C, H, W)
+    - cache: Values needed for the backward pass
+    """
+    out, cache = None, None
+    eps = gn_param.get('eps',1e-5)
+    ###########################################################################
+    # TODO: Implement the forward pass for spatial group normalization.       #
+    # This will be extremely similar to the layer norm implementation.        #
+    # In particular, think about how you could transform the matrix so that   #
+    # the bulk of the code is similar to both train-time batch normalization  #
+    # and layer normalization!                                                #
+    ###########################################################################
+    N, C, H, W = x.shape
+    x = x.reshape((N*G, C//G*H*W))
+    x = x.T
+
+    sample_mean = np.mean(x, axis=0)  # (N*G,)
+    sample_var = np.var(x, axis=0)
+    var_corr_root = np.sqrt(sample_var + eps)
+
+    x_norm = (x - sample_mean)/var_corr_root
+    x_norm = x_norm.T.reshape((N,C,H,W))
+
+    out = gamma*x_norm + beta
+    cache = (gamma, x_norm, var_corr_root, G)
+    ###########################################################################
+    #                             END OF YOUR CODE                            #
+    ###########################################################################
+    return out, cache
+
+
+def spatial_groupnorm_backward(dout, cache):
+    """
+    Computes the backward pass for spatial group normalization.
+
+    Inputs:
+    - dout: Upstream derivatives, of shape (N, C, H, W)
+    - cache: Values from the forward pass
+
+    Returns a tuple of:
+    - dx: Gradient with respect to inputs, of shape (N, C, H, W)
+    - dgamma: Gradient with respect to scale parameter, of shape (C,)
+    - dbeta: Gradient with respect to shift parameter, of shape (C,)
+    """
+    dx, dgamma, dbeta = None, None, None
+
+    ###########################################################################
+    # TODO: Implement the backward pass for spatial group normalization.      #
+    # This will be extremely similar to the layer norm implementation.        #
+    ###########################################################################
+    gamma, x_norm, var_corr_root, G = cache
+
+    # Set keepdims=True to make dbeta and dgamma's shape be (1, C, 1, 1)
+    dgamma = np.sum(x_norm * dout, axis=(0,2,3), keepdims=True)  # sum((N, D) * (N, D)) = (D,)
+    dbeta = np.sum(dout, axis=(0,2,3), keepdims=True)  # (D,)
+
+    N, C, H, W = x_norm.shape
+    x_norm = x_norm.reshape((N*G,C//G*H*W)).T
+
+    dxnorm = gamma * dout  # (D,) * (N, D) = (N, D)
+    dxnorm = dxnorm.reshape((N*G,C//G*H*W)).T
+
+    # NOTE: dimensions in the comments are inverted
+    dmult1 = 1 / var_corr_root * dxnorm  # (N, D)
+    dmult2 = np.sum(x_norm * var_corr_root * dxnorm, axis=0)  # (D,)
+
+    dmult2 = -1 / var_corr_root**2 * dmult2  # (D,)
+
+    dmult2 = 0.5 / var_corr_root * dmult2  # (D,)
+
+    N_i, D_i = x_norm.shape
+    dmult2 = 1 / N_i * np.ones((N_i, D_i)) * dmult2  # (N, D)
+
+    dmult2 = 2 * x_norm * var_corr_root * dmult2  # (N, D)
+
+    dx = dmult1 + dmult2  # (N, D)
+
+    dterm1 = 1 * dx  # (N, D)
+    dterm2 = -1 * np.sum(dx, axis=0)  # (D,)
+
+    dterm2 = 1/N_i * np.ones((N_i, D_i)) * dterm2  # (N, D)
+
+    dx = dterm1 + dterm2  # (N, D)
+    dx = dx.T.reshape((N,C,H,W))
+    ###########################################################################
+    #                             END OF YOUR CODE                            #
+    ###########################################################################
     return dx, dgamma, dbeta
 
 
