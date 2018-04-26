@@ -15,11 +15,11 @@ ___
 * [Q5: Higher Level Representations: Image Features](/assignment1/features.ipynb)
 
 ### [Assignment #2: Fully-Connected Nets, Batch Normalization, Dropout, Convolutional Nets](/assignment2)
-* [Q1: Fully-connected Neural Network](/assignment2/FullyConnectedNets.ipynb)
-* [Q2: Batch Normalization](/assignment2/BatchNormalization.ipynb)
-* [Q3: Dropout](/assignment2/Dropout.ipynb)
-* [Q4: Convolutional Networks](/assignment2/ConvolutionalNetworks.ipynb)
-* Q5: [PyTorch](/assignment2/PyTorch.ipynb) / [TensorFlow](/assignment2/TensorFlow.ipynb) on CIFAR-10
+* [Q1: Fully-connected Neural Network](/assignment2/FullyConnectedNets_2018.ipynb)
+* [Q2: Batch Normalization](/assignment2/BatchNormalization_2018.ipynb)
+* [Q3: Dropout](/assignment2/Dropout_2018.ipynb)
+* [Q4: Convolutional Networks](/assignment2/ConvolutionalNetworks_2018.ipynb)
+* Q5: [PyTorch](/assignment2/PyTorch_2018.ipynb) / [TensorFlow](/assignment2/TensorFlow_2017.ipynb) on CIFAR-10
 
 ### Assignment #3: Image Captioning with Vanilla RNNs, Image Captioning with LSTMs, Network Visualization, Style Transfer, Generative Adversarial Networks
 * Q1: Image Captioning with Vanilla RNNs
