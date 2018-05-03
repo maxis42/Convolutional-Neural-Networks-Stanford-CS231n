@@ -42,3 +42,22 @@ ___
 * Q3: Network Visualization: Saliency maps, Class Visualization, and Fooling Images
 * Q4: Style Transfer
 * Q5: Generative Adversarial Networks
+___
+
+### [Course Notes](/Course%20Notes)
+* [Google Cloud Tutorial](/Course%20Notes/Google%20Cloud%20Tutorial.pdf)
+* [AWS Tutorial](/Course%20Notes/AWS%20Tutorial.pdf)
+<br></br>
+* [Module 1: Neural Networks](/Course%20Notes/Module%201%20Neural%20Networks)
+  * [Image Classification: Data-driven Approach, k-Nearest Neighbor, train/val/test splits](/Course%20Notes/Module%201%20Neural%20Networks/1%20Image%20classification.pdf)
+  * [Linear classification: Support Vector Machine, Softmax](/Course%20Notes/Module%201%20Neural%20Networks/2%20Linear%20classification.pdf)
+  * [Optimization: Stochastic Gradient Descent](/Course%20Notes/Module%201%20Neural%20Networks/3%20Optimization.pdf)
+  * [Backpropagation, Intuitions](/Course%20Notes/Module%201%20Neural%20Networks/4%20Backpropagation.pdf)
+  * [Neural Networks Part 1: Setting up the Architecture](/Course%20Notes/Module%201%20Neural%20Networks/5%20Neural%20Networks%20Part%201.pdf)
+  * [Neural Networks Part 2: Setting up the Data and the Loss](/Course%20Notes/Module%201%20Neural%20Networks/6%20Neural%20Networks%20Part%202.pdf)
+  * [Neural Networks Part 3: Learning and Evaluation](/Course%20Notes/Module%201%20Neural%20Networks/7%20Neural%20Networks%20Part%203.pdf)
+  * [Putting it together: Minimal Neural Network Case Study](/Course%20Notes/Module%201%20Neural%20Networks/8%20Minimal%20Neural%20Network%20Case%20Study.pdf)
+* [Module 2: Convolutional Neural Networks](/Course%20Notes/Module%202%20Convolutional%20Neural%20Networks)
+  * [Convolutional Neural Networks: Architectures, Convolution / Pooling Layers](/Course%20Notes/Module%202%20Convolutional%20Neural%20Networks/1%20Convolutional%20Neural%20Networks.pdf)
+  * [Understanding and Visualizing Convolutional Neural Networks](/Course%20Notes/Module%202%20Convolutional%20Neural%20Networks/2%20Understanding%20and%20Visualizing.pdf)
+  * [Transfer Learning and Fine-tuning Convolutional Neural Networks](/Course%20Notes/Module%202%20Convolutional%20Neural%20Networks/3%20Transfer%20Learning%20and%20Fine-tuning.pdf)
