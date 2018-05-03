@@ -19,7 +19,7 @@ ___
 * [Q2: Batch Normalization](/assignment2/BatchNormalization_2018.ipynb)
 * [Q3: Dropout](/assignment2/Dropout_2018.ipynb)
 * [Q4: Convolutional Networks](/assignment2/ConvolutionalNetworks_2018.ipynb)
-* Q5: [PyTorch](/assignment2/PyTorch_2018.ipynb) / [TensorFlow](/assignment2/TensorFlow_2017.ipynb) on CIFAR-10
+* Q5: [PyTorch](/assignment2/PyTorch_2018.ipynb) / [TensorFlow](/assignment2/TensorFlow_2018.ipynb) on CIFAR-10
 
 ### Assignment #3: Image Captioning with Vanilla RNNs, Image Captioning with LSTMs, Network Visualization, Style Transfer, Generative Adversarial Networks
 * Q1: Image Captioning with Vanilla RNNs
