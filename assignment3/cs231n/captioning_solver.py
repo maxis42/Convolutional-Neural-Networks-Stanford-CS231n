@@ -225,4 +225,3 @@ class CaptioningSolver(object):
                 self.epoch += 1
                 for k in self.optim_configs:
                     self.optim_configs[k]['learning_rate'] *= self.lr_decay
-
