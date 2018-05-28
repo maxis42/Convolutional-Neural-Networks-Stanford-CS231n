@@ -36,9 +36,9 @@ ___
 * [Q4: Convolutional Networks](/assignment2/ConvolutionalNetworks_2018.ipynb)
 * Q5: [PyTorch](/assignment2/PyTorch_2018.ipynb) / [TensorFlow](/assignment2/TensorFlow_2018.ipynb) on CIFAR-10
 
-### Assignment #3: Image Captioning with Vanilla RNNs, Image Captioning with LSTMs, Network Visualization, Style Transfer, Generative Adversarial Networks
-* Q1: Image Captioning with Vanilla RNNs
-* Q2: Image Captioning with LSTMs
+### [Assignment #3: Image Captioning with Vanilla RNNs, Image Captioning with LSTMs, Network Visualization, Style Transfer, Generative Adversarial Networks](/assignment3)
+* [Q1: Image Captioning with Vanilla RNNs](/assignment3/RNN_Captioning.ipynb)
+* [Q2: Image Captioning with LSTMs](/assignment3/LSTM_Captioning.ipynb)
 * Q3: Network Visualization: Saliency maps, Class Visualization, and Fooling Images
 * Q4: Style Transfer
 * Q5: Generative Adversarial Networks
